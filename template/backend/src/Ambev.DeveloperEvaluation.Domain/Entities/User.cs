@@ -14,8 +14,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities;
 public class User : BaseEntity, IUser
 {
     /// <summary>
-    /// Gets the user's full name.
-    /// Must not be null or empty and should contain both first and last names.
+    /// Gets the user's username.
+    /// Must not be null or empty.
     /// </summary>
     public string Username { get; set; } = string.Empty;
 
@@ -29,7 +29,47 @@ public class User : BaseEntity, IUser
     /// Gets the user's phone number.
     /// Must be a valid phone number format following the pattern (XX) XXXXX-XXXX.
     /// </summary>
-    public string Phone { get; set; } = string.Empty ;
+    public string Phone { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's first name.
+    /// </summary>
+    public string Firstname { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's last name.
+    /// </summary>
+    public string Lastname { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's city.
+    /// </summary>
+    public string City { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's street address.
+    /// </summary>
+    public string Street { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's address number.
+    /// </summary>
+    public int Number { get; set; }
+
+    /// <summary>
+    /// Gets the user's zipcode.
+    /// </summary>
+    public string Zipcode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's latitude coordinate.
+    /// </summary>
+    public string Latitude { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the user's longitude coordinate.
+    /// </summary>
+    public string Longitude { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets the hashed password for authentication.
