@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Common;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class BaseController : ControllerBase
 {
     protected int GetCurrentUserId() =>
