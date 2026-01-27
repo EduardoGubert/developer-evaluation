@@ -26,6 +26,16 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Role)
             .HasConversion<string>()
             .HasMaxLength(20);
-
+                
+        builder.Property(u => u.Firstname).IsRequired().HasMaxLength(100);
+        builder.Property(u => u.Lastname).IsRequired().HasMaxLength(100);
+        
+        builder.Property(u => u.City).IsRequired().HasMaxLength(100);
+        builder.Property(u => u.Street).IsRequired().HasMaxLength(200);
+        builder.Property(u => u.Number).IsRequired();
+        builder.Property(u => u.Zipcode).IsRequired().HasMaxLength(20);
+        
+        builder.Property(u => u.Latitude).HasMaxLength(50);
+        builder.Property(u => u.Longitude).HasMaxLength(50);
     }
 }

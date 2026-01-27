@@ -28,5 +28,28 @@ public class UserValidator : AbstractValidator<User>
         RuleFor(user => user.Role)
             .NotEqual(UserRole.None)
             .WithMessage("User role cannot be None.");
+
+        RuleFor(user => user.Firstname)
+            .NotEmpty().WithMessage("First name is required.")
+            .MaximumLength(100).WithMessage("First name cannot be longer than 100 characters.");
+
+        RuleFor(user => user.Lastname)
+            .NotEmpty().WithMessage("Last name is required.")
+            .MaximumLength(100).WithMessage("Last name cannot be longer than 100 characters.");
+
+        RuleFor(user => user.City)
+            .NotEmpty().WithMessage("City is required.")
+            .MaximumLength(100).WithMessage("City cannot be longer than 100 characters.");
+
+        RuleFor(user => user.Street)
+            .NotEmpty().WithMessage("Street is required.")
+            .MaximumLength(200).WithMessage("Street cannot be longer than 200 characters.");
+
+        RuleFor(user => user.Number)
+            .GreaterThan(0).WithMessage("Address number must be greater than 0.");
+
+        RuleFor(user => user.Zipcode)
+            .NotEmpty().WithMessage("Zipcode is required.")
+            .MaximumLength(20).WithMessage("Zipcode cannot be longer than 20 characters.");
     }
 }
