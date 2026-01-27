@@ -1,13 +1,15 @@
-using Ambev.DeveloperEvaluation.Common.Validation;
-using MediatR;
-
-namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 
 /// <summary>
-/// Command for creating a new sale.
+/// Response model for CreateSale operation.
 /// </summary>
-public class CreateSaleCommand : IRequest<CreateSaleResult>
+public class CreateSaleResponse
 {
+    /// <summary>
+    /// Gets or sets the sale identifier.
+    /// </summary>
+    public Guid Id { get; set; }
+
     /// <summary>
     /// Gets or sets the sale number.
     /// </summary>
@@ -39,18 +41,12 @@ public class CreateSaleCommand : IRequest<CreateSaleResult>
     public string BranchName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the sale items.
+    /// Gets or sets the total amount.
     /// </summary>
-    public List<CreateSaleItemCommand> Items { get; set; } = new();
+    public decimal TotalAmount { get; set; }
 
-    public ValidationResultDetail Validate()
-    {
-        var validator = new CreateSaleCommandValidator();
-        var result = validator.Validate(this);
-        return new ValidationResultDetail
-        {
-            IsValid = result.IsValid,
-            Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
-        };
-    }
+    /// <summary>
+    /// Gets or sets the items.
+    /// </summary>
+    public List<CreateSaleItemResponse> Items { get; set; } = new();
 }

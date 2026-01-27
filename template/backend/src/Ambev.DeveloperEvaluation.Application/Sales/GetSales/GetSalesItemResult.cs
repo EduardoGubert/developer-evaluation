@@ -1,52 +1,52 @@
-namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+namespace Ambev.DeveloperEvaluation.Application.Sales.GetSales;
 
 /// <summary>
-/// Represents the response returned after successfully creating a new sale.
+/// Response model for a sale in the list.
 /// </summary>
-public class CreateSaleResult
+public class GetSalesItemResult
 {
     /// <summary>
-    /// Gets or sets the unique identifier of the newly created sale.
+    /// The unique identifier of the sale.
     /// </summary>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the sale number.
+    /// The sale number.
     /// </summary>
     public string SaleNumber { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the sale date.
+    /// The sale date.
     /// </summary>
     public DateTime SaleDate { get; set; }
 
     /// <summary>
-    /// Gets or sets the customer identifier.
+    /// The customer identifier.
     /// </summary>
     public Guid CustomerId { get; set; }
 
     /// <summary>
-    /// Gets or sets the customer name.
+    /// The customer name.
     /// </summary>
     public string CustomerName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the branch identifier.
+    /// The branch identifier.
     /// </summary>
     public Guid BranchId { get; set; }
 
     /// <summary>
-    /// Gets or sets the branch name.
+    /// The branch name.
     /// </summary>
     public string BranchName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the total amount.
+    /// The total amount of the sale.
     /// </summary>
     public decimal TotalAmount { get; set; }
 
     /// <summary>
-    /// Gets or sets the sale items.
+    /// Whether the sale is cancelled.
     /// </summary>
-    public List<CreateSaleItemResult> Items { get; set; } = new();
+    public bool IsCancelled { get; set; }
 }
