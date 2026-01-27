@@ -72,4 +72,88 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    /// <summary>
+    /// Retrieves all users with pagination support
+    /// </summary>
+    public async Task<(IEnumerable<User> Users, int TotalCount)> GetAllAsync(
+        int page = 1,
+        int size = 10,
+        string? order = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Users.AsQueryable();
+
+        query = ApplyOrdering(query, order);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var users = await query
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (users, totalCount);
+    }
+
+    /// <summary>
+    /// Updates an existing user in the database
+    /// </summary>
+    public async Task<User> UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
+        return user;
+    }
+
+    private static IQueryable<User> ApplyOrdering(IQueryable<User> query, string? order)
+    {
+        if (string.IsNullOrWhiteSpace(order))
+            return query.OrderBy(u => u.Username);
+
+        var orderParams = order.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var isFirstOrder = true;
+
+        foreach (var param in orderParams)
+        {
+            var trimmedParam = param.Trim();
+            var parts = trimmedParam.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var propertyName = parts[0].ToLowerInvariant();
+            var descending = parts.Length > 1 && parts[1].Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+            query = propertyName switch
+            {
+                "username" => ApplyOrder(query, u => u.Username, descending, isFirstOrder),
+                "email" => ApplyOrder(query, u => u.Email, descending, isFirstOrder),
+                "phone" => ApplyOrder(query, u => u.Phone, descending, isFirstOrder),
+                "status" => ApplyOrder(query, u => u.Status, descending, isFirstOrder),
+                "role" => ApplyOrder(query, u => u.Role, descending, isFirstOrder),
+                "createdat" => ApplyOrder(query, u => u.CreatedAt, descending, isFirstOrder),
+                _ => query
+            };
+
+            isFirstOrder = false;
+        }
+
+        return query;
+    }
+
+    private static IQueryable<User> ApplyOrder<TKey>(
+        IQueryable<User> query,
+        System.Linq.Expressions.Expression<Func<User, TKey>> keySelector,
+        bool descending,
+        bool isFirstOrder)
+    {
+        if (isFirstOrder)
+        {
+            return descending
+                ? query.OrderByDescending(keySelector)
+                : query.OrderBy(keySelector);
+        }
+
+        var orderedQuery = query as IOrderedQueryable<User>;
+        return descending
+            ? orderedQuery!.ThenByDescending(keySelector)
+            : orderedQuery!.ThenBy(keySelector);
+    }
 }
