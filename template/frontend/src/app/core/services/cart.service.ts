@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponseWithData, PaginatedList } from '../models/api-response.model';
-import { Cart, CreateCartRequest } from '../models/cart.model';
+import { Cart, CreateCartRequest, CheckoutCartRequest, CheckoutCartResponse } from '../models/cart.model';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -42,5 +42,11 @@ export class CartService {
 
   deleteCart(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  checkout(cartId: string, request: CheckoutCartRequest): Observable<CheckoutCartResponse> {
+    return this.http.post<ApiResponseWithData<CheckoutCartResponse>>(`${this.apiUrl}/${cartId}/checkout`, request).pipe(
+      map(res => res.data)
+    );
   }
 }

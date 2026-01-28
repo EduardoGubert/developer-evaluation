@@ -19,6 +19,8 @@ export class AuthService {
     return this.http.post<ApiResponseWithData<AuthResponse>>(this.apiUrl, credentials).pipe(
       map(res => res.data),
       tap(user => {
+        const decoded: any = jwtDecode(user.token);
+        user.userId = decoded.nameid || decoded.sub || '';
         localStorage.setItem('token', user.token);
         localStorage.setItem('user', JSON.stringify(user));
         this.currentUserSubject.next(user);
@@ -62,6 +64,9 @@ export class AuthService {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         return null;
+      }
+      if (!parsed.userId) {
+        parsed.userId = decoded.nameid || decoded.sub || '';
       }
       return parsed;
     } catch {

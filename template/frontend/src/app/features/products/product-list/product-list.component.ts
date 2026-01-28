@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { Product } from '../../../core/models/product.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ShoppingCartService } from '../../../core/services/shopping-cart.service';
 
 @Component({
   selector: 'app-product-list',
@@ -15,7 +16,7 @@ export class ProductListComponent implements OnInit {
   selectedCategory = '';
   currentPage = 1;
   totalPages = 1;
-  totalCount = 0;
+  totalItems = 0;
   pageSize = 10;
   isLoading = false;
   orderBy = '';
@@ -23,7 +24,8 @@ export class ProductListComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private shoppingCartService: ShoppingCartService
   ) {}
 
   ngOnInit(): void {
@@ -41,7 +43,7 @@ export class ProductListComponent implements OnInit {
       next: (res) => {
         this.products = res.data;
         this.totalPages = res.totalPages;
-        this.totalCount = res.totalCount;
+        this.totalItems = res.totalItems;
         this.isLoading = false;
       },
       error: () => {
@@ -84,5 +86,10 @@ export class ProductListComponent implements OnInit {
         }
       });
     }
+  }
+
+  addToCart(product: Product, event: Event): void {
+    event.stopPropagation();
+    this.shoppingCartService.addToCart(product.id).subscribe();
   }
 }

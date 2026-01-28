@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
 import { Product } from '../../../core/models/product.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ShoppingCartService } from '../../../core/services/shopping-cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -12,12 +13,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   isLoading = false;
+  quantity = 1;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private productService: ProductService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private shoppingCartService: ShoppingCartService
   ) {}
 
   ngOnInit(): void {
@@ -55,6 +58,12 @@ export class ProductDetailComponent implements OnInit {
   editProduct(): void {
     if (this.product) {
       this.router.navigate(['/products', this.product.id, 'edit']);
+    }
+  }
+
+  addToCart(): void {
+    if (this.product) {
+      this.shoppingCartService.addToCart(this.product.id, this.quantity).subscribe();
     }
   }
 

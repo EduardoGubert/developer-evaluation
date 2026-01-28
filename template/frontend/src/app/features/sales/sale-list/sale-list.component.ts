@@ -13,7 +13,7 @@ export class SaleListComponent implements OnInit {
   sales: Sale[] = [];
   currentPage = 1;
   totalPages = 1;
-  totalCount = 0;
+  totalItems = 0;
   pageSize = 10;
   isLoading = false;
   displayedColumns = ['saleNumber', 'customer', 'branch', 'totalAmount', 'status', 'actions'];
@@ -34,7 +34,7 @@ export class SaleListComponent implements OnInit {
       next: (res) => {
         this.sales = res.data;
         this.totalPages = res.totalPages;
-        this.totalCount = res.totalCount;
+        this.totalItems = res.totalItems;
         this.isLoading = false;
       },
       error: () => {

@@ -96,6 +96,25 @@ mat-divider {
   }
 }
 
+.add-to-cart-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+
+  .quantity-field {
+    width: 80px;
+  }
+
+  .add-cart-btn {
+    height: 48px;
+    font-size: 16px;
+  }
+}
+
 .product-actions {
   display: flex;
   gap: 12px;

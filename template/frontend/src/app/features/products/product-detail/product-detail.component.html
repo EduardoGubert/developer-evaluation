@@ -9,7 +9,7 @@
     <div class="product-detail-layout">
       <div class="product-image-container">
         <img [src]="product.image" [alt]="product.title" class="product-detail-image"
-             onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+                 onerror="this.src='/assets/images/image-placeholder.png'"/>
       </div>
       <div class="product-info">
         <div class="product-category-badge">{{ product.category }}</div>
@@ -27,6 +27,16 @@
         <div class="product-description">
           <h3>Description</h3>
           <p>{{ product.description }}</p>
+        </div>
+
+        <div class="add-to-cart-section">
+          <mat-form-field appearance="outline" class="quantity-field">
+            <mat-label>Qty</mat-label>
+            <input matInput type="number" [(ngModel)]="quantity" min="1" max="20">
+          </mat-form-field>
+          <button mat-raised-button color="accent" (click)="addToCart()" class="add-cart-btn">
+            <mat-icon>add_shopping_cart</mat-icon> Add to Cart
+          </button>
         </div>
 
         <div class="product-actions">

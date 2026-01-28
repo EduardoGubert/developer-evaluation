@@ -10,7 +10,10 @@
     Sales
   </button>
   <button mat-button routerLink="/cart" routerLinkActive="active">
-    <mat-icon>shopping_cart</mat-icon>
+    <mat-icon [matBadge]="(cartItemCount$ | async) || null"
+              matBadgeColor="accent"
+              matBadgeSize="small"
+              [matBadgeHidden]="!(cartItemCount$ | async)">shopping_cart</mat-icon>
     Cart
   </button>
   <span class="spacer"></span>

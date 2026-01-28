@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { ShoppingCartService } from '../../../core/services/shopping-cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -7,7 +9,14 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  constructor(public authService: AuthService) {}
+  cartItemCount$: Observable<number>;
+
+  constructor(
+    public authService: AuthService,
+    private shoppingCartService: ShoppingCartService
+  ) {
+    this.cartItemCount$ = this.shoppingCartService.itemCount$;
+  }
 
   logout(): void {
     this.authService.logout();

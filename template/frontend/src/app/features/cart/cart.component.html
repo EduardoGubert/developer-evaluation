@@ -1,60 +1,116 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Carts</h1>
+    <h1>Shopping Cart</h1>
+    <button mat-button color="primary" (click)="continueShopping()">
+      <mat-icon>arrow_back</mat-icon> Continue Shopping
+    </button>
   </div>
 
   <app-loading [isLoading]="isLoading"></app-loading>
 
-  <div class="table-container" *ngIf="!isLoading && carts.length > 0">
-    <table mat-table [dataSource]="carts" class="full-width">
-      <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef>ID</th>
-        <td mat-cell *matCellDef="let cart" class="id-cell">{{ cart.id | slice:0:8 }}...</td>
-      </ng-container>
+  <div class="cart-content" *ngIf="!isLoading && cartItems.length > 0">
+    <div class="cart-items">
+      <table mat-table [dataSource]="cartItems" class="full-width">
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let item">
+            <img [src]="item.productImage" [alt]="item.productName" class="cart-item-image"
+                 onerror="this.src='/assets/images/image-placeholder.png'"/>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="userId">
-        <th mat-header-cell *matHeaderCellDef>User ID</th>
-        <td mat-cell *matCellDef="let cart" class="id-cell">{{ cart.userId | slice:0:8 }}...</td>
-      </ng-container>
+        <ng-container matColumnDef="product">
+          <th mat-header-cell *matHeaderCellDef>Product</th>
+          <td mat-cell *matCellDef="let item">
+            <div class="product-name">{{ item.productName }}</div>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let cart">{{ cart.date | date:'medium' }}</td>
-      </ng-container>
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+          <td mat-cell *matCellDef="let item">{{ item.unitPrice | currency:'BRL' }}</td>
+        </ng-container>
 
-      <ng-container matColumnDef="products">
-        <th mat-header-cell *matHeaderCellDef>Products</th>
-        <td mat-cell *matCellDef="let cart">
-          <span class="product-count">{{ cart.products?.length || 0 }} item(s)</span>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Quantity</th>
+          <td mat-cell *matCellDef="let item">
+            <div class="quantity-controls">
+              <button mat-icon-button (click)="updateQuantity(item, item.quantity - 1)"
+                      [disabled]="item.quantity <= 1" matTooltip="Decrease">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="quantity-value">{{ item.quantity }}</span>
+              <button mat-icon-button (click)="updateQuantity(item, item.quantity + 1)"
+                      [disabled]="item.quantity >= 20" matTooltip="Increase">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <div class="discount-badge" *ngIf="getDiscountInfo(item.quantity).rate > 0">
+              {{ getDiscountInfo(item.quantity).label }}
+            </div>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let cart">
-          <button mat-icon-button color="warn" (click)="deleteCart(cart.id)" matTooltip="Delete Cart">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
+        <ng-container matColumnDef="subtotal">
+          <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+          <td mat-cell *matCellDef="let item">
+            <strong>{{ item.subtotal | currency:'BRL' }}</strong>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let item">
+            <button mat-icon-button color="warn" (click)="removeItem(item)" matTooltip="Remove">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="cart-summary">
+      <div class="summary-details">
+        <div class="summary-row">
+          <span>Items:</span>
+          <span>{{ totalItemCount }}</span>
+        </div>
+        <div class="summary-row total-row">
+          <span>Subtotal (before discounts):</span>
+          <span>{{ totalAmount | currency:'BRL' }}</span>
+        </div>
+        <div class="discount-info">
+          <mat-icon>info</mat-icon>
+          <span>Discounts applied at checkout: 4-9 items = 10% off, 10-20 items = 20% off (per product)</span>
+        </div>
+      </div>
+
+      <div class="checkout-section">
+        <mat-form-field appearance="outline" class="branch-field">
+          <mat-label>Branch Name</mat-label>
+          <input matInput [(ngModel)]="branchName" placeholder="e.g. Downtown Store">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="checkout-btn"
+                (click)="checkout()" [disabled]="isCheckingOut || !branchName.trim()">
+          <mat-icon>payment</mat-icon>
+          <span *ngIf="!isCheckingOut">Checkout</span>
+          <span *ngIf="isCheckingOut">Processing...</span>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="no-data" *ngIf="!isLoading && carts.length === 0">
+  <div class="no-data" *ngIf="!isLoading && cartItems.length === 0">
     <mat-icon>shopping_cart</mat-icon>
-    <p>No carts found.</p>
-  </div>
-
-  <div class="pagination" *ngIf="totalPages > 1">
-    <button mat-icon-button [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} items)</span>
-    <button mat-icon-button [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
-      <mat-icon>chevron_right</mat-icon>
+    <p>Your cart is empty.</p>
+    <button mat-raised-button color="primary" (click)="continueShopping()">
+      Browse Products
     </button>
   </div>
 </div>
