@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Application.Products.GetProducts;
+using Ambev.DeveloperEvaluation.Domain.Common.Interfaces;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
@@ -15,14 +16,20 @@ namespace Ambev.DeveloperEvaluation.Unit.Application;
 public class GetProductsHandlerTests
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
     private readonly GetProductsHandler _handler;
 
     public GetProductsHandlerTests()
     {
         _productRepository = Substitute.For<IProductRepository>();
+        _cacheService = Substitute.For<ICacheService>();
         _mapper = Substitute.For<IMapper>();
-        _handler = new GetProductsHandler(_productRepository, _mapper);
+        
+        _cacheService.GetAsync<GetProductsResult>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns((GetProductsResult?)null);
+
+        _handler = new GetProductsHandler(_productRepository, _cacheService, _mapper);
     }
 
     /// <summary>

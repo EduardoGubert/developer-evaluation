@@ -1,5 +1,9 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Repositories;
+﻿using Ambev.DeveloperEvaluation.Domain.Common.Interfaces;
+using Ambev.DeveloperEvaluation.Domain.Events;
+using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.ORM;
+using Ambev.DeveloperEvaluation.ORM.Caching;
+using Ambev.DeveloperEvaluation.ORM.MongoDB;
 using Ambev.DeveloperEvaluation.ORM.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +20,8 @@ public class InfrastructureModuleInitializer : IModuleInitializer
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<ISaleRepository, SaleRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
-        builder.Services.AddScoped<ICartRepository, CartRepository>();
+        builder.Services.AddScoped<ICartRepository, CartRepository>();        
+        builder.Services.AddScoped<ICacheService, RedisCacheService>();       
+        builder.Services.AddSingleton<IEventStore, MongoEventStore>();
     }
 }
