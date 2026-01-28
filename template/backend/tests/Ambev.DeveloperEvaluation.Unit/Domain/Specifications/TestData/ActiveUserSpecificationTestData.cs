@@ -29,7 +29,15 @@ public static class ActiveUserSpecificationTestData
             Username = f.Name.FirstName(),
             Status = f.PickRandom<UserStatus>(),
             Phone = $"+55{f.Random.Number(11, 99)}{f.Random.Number(100000000, 999999999)}",
-            Role = f.PickRandom<UserRole> ()
+            Role = f.PickRandom<UserRole>(),            
+            Firstname = f.Name.FirstName(),
+            Lastname = f.Name.LastName(),            
+            City = f.Address.City(),
+            Street = f.Address.StreetName(),
+            Number = f.Random.Number(1, 9999),
+            Zipcode = f.Address.ZipCode(),
+            Latitude = f.Address.Latitude().ToString(),
+            Longitude = f.Address.Longitude().ToString()
         });
 
     /// <summary>
