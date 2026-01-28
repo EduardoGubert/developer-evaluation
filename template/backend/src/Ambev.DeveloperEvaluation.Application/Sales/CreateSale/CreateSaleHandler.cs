@@ -14,15 +14,18 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleResult>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateSaleHandler> _logger;
 
     public CreateSaleHandler(
         ISaleRepository saleRepository,
+        IEventStore eventStore,
         IMapper mapper,
         ILogger<CreateSaleHandler> logger)
     {
         _saleRepository = saleRepository;
+        _eventStore = eventStore;
         _mapper = mapper;
         _logger = logger;
     }
@@ -51,13 +54,28 @@ public class CreateSaleHandler : IRequestHandler<CreateSaleCommand, CreateSaleRe
         }
 
         var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
+                
+        await _eventStore.AppendAsync(
+            eventType: "SaleCreated",
+            aggregateId: createdSale.Id.ToString(),
+            aggregateType: "Sale",
+            data: new
+            {
+                createdSale.SaleNumber,
+                createdSale.TotalAmount,
+                createdSale.CustomerId,
+                createdSale.CustomerName,
+                createdSale.BranchId,
+                createdSale.BranchName,
+                ItemCount = createdSale.Items.Count
+            },
+            cancellationToken: cancellationToken);
 
-        var saleCreatedEvent = new SaleCreatedEvent(createdSale);
         _logger.LogInformation(
             "SaleCreated event published. SaleId: {SaleId}, SaleNumber: {SaleNumber}, TotalAmount: {TotalAmount}",
-            saleCreatedEvent.Sale.Id,
-            saleCreatedEvent.Sale.SaleNumber,
-            saleCreatedEvent.Sale.TotalAmount);
+            createdSale.Id,
+            createdSale.SaleNumber,
+            createdSale.TotalAmount);
 
         var result = _mapper.Map<CreateSaleResult>(createdSale);
         return result;

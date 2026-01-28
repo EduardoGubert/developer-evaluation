@@ -12,13 +12,16 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSaleItem;
 public class CancelSaleItemHandler : IRequestHandler<CancelSaleItemCommand, CancelSaleItemResponse>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly ILogger<CancelSaleItemHandler> _logger;
 
     public CancelSaleItemHandler(
         ISaleRepository saleRepository,
+        IEventStore eventStore,
         ILogger<CancelSaleItemHandler> logger)
     {
         _saleRepository = saleRepository;
+        _eventStore = eventStore;
         _logger = logger;
     }
 
@@ -43,12 +46,29 @@ public class CancelSaleItemHandler : IRequestHandler<CancelSaleItemCommand, Canc
 
         await _saleRepository.UpdateAsync(sale, cancellationToken);
 
-        var itemCancelledEvent = new ItemCancelledEvent(sale.Id, cancelledItem.Id, cancelledItem.ProductName);
+        // Persist event to MongoDB audit log
+        await _eventStore.AppendAsync(
+            eventType: "ItemCancelled",
+            aggregateId: sale.Id.ToString(),
+            aggregateType: "Sale",
+            data: new
+            {
+                sale.SaleNumber,
+                ItemId = cancelledItem.Id,
+                cancelledItem.ProductId,
+                cancelledItem.ProductName,
+                cancelledItem.Quantity,
+                cancelledItem.TotalAmount,
+                NewSaleTotalAmount = sale.TotalAmount,
+                CancelledAt = DateTime.UtcNow
+            },
+            cancellationToken: cancellationToken);
+
         _logger.LogInformation(
             "ItemCancelled event published. SaleId: {SaleId}, ItemId: {ItemId}, ProductName: {ProductName}",
-            itemCancelledEvent.SaleId,
-            itemCancelledEvent.ItemId,
-            itemCancelledEvent.ProductName);
+            sale.Id,
+            cancelledItem.Id,
+            cancelledItem.ProductName);
 
         return new CancelSaleItemResponse
         {

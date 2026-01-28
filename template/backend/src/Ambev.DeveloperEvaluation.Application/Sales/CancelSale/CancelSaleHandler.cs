@@ -12,13 +12,16 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 public class CancelSaleHandler : IRequestHandler<CancelSaleCommand, CancelSaleResponse>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly ILogger<CancelSaleHandler> _logger;
 
     public CancelSaleHandler(
         ISaleRepository saleRepository,
+        IEventStore eventStore,
         ILogger<CancelSaleHandler> logger)
     {
         _saleRepository = saleRepository;
+        _eventStore = eventStore;
         _logger = logger;
     }
 
@@ -36,12 +39,25 @@ public class CancelSaleHandler : IRequestHandler<CancelSaleCommand, CancelSaleRe
 
         sale.Cancel();
         await _saleRepository.UpdateAsync(sale, cancellationToken);
+                
+        await _eventStore.AppendAsync(
+            eventType: "SaleCancelled",
+            aggregateId: sale.Id.ToString(),
+            aggregateType: "Sale",
+            data: new
+            {
+                sale.SaleNumber,
+                sale.TotalAmount,
+                sale.CustomerId,
+                sale.CustomerName,
+                CancelledAt = DateTime.UtcNow
+            },
+            cancellationToken: cancellationToken);
 
-        var saleCancelledEvent = new SaleCancelledEvent(sale.Id, sale.SaleNumber);
         _logger.LogInformation(
             "SaleCancelled event published. SaleId: {SaleId}, SaleNumber: {SaleNumber}",
-            saleCancelledEvent.SaleId,
-            saleCancelledEvent.SaleNumber);
+            sale.Id,
+            sale.SaleNumber);
 
         return new CancelSaleResponse
         {

@@ -1,5 +1,6 @@
 using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using AutoMapper;
@@ -16,6 +17,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Application;
 public class UpdateSaleHandlerTests
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateSaleHandler> _logger;
     private readonly UpdateSaleHandler _handler;
@@ -23,9 +25,10 @@ public class UpdateSaleHandlerTests
     public UpdateSaleHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
+        _eventStore = Substitute.For<IEventStore>();
         _mapper = Substitute.For<IMapper>();
         _logger = Substitute.For<ILogger<UpdateSaleHandler>>();
-        _handler = new UpdateSaleHandler(_saleRepository, _mapper, _logger);
+        _handler = new UpdateSaleHandler(_saleRepository, _eventStore, _mapper, _logger);
     }
 
     /// <summary>

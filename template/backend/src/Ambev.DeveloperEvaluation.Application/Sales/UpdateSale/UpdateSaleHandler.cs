@@ -13,15 +13,18 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly IMapper _mapper;
     private readonly ILogger<UpdateSaleHandler> _logger;
 
     public UpdateSaleHandler(
         ISaleRepository saleRepository,
+        IEventStore eventStore,
         IMapper mapper,
         ILogger<UpdateSaleHandler> logger)
     {
         _saleRepository = saleRepository;
+        _eventStore = eventStore;
         _mapper = mapper;
         _logger = logger;
     }
@@ -41,6 +44,8 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         if (sale.IsCancelled)
             throw new InvalidOperationException("Cannot update a cancelled sale");
 
+        var previousTotal = sale.TotalAmount;
+
         sale.Update(
             command.CustomerId,
             command.CustomerName,
@@ -59,13 +64,27 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         }
 
         var updatedSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
+               
+        await _eventStore.AppendAsync(
+            eventType: "SaleModified",
+            aggregateId: updatedSale.Id.ToString(),
+            aggregateType: "Sale",
+            data: new
+            {
+                updatedSale.SaleNumber,
+                PreviousTotalAmount = previousTotal,
+                NewTotalAmount = updatedSale.TotalAmount,
+                updatedSale.CustomerId,
+                updatedSale.CustomerName,
+                ItemCount = updatedSale.Items.Count
+            },
+            cancellationToken: cancellationToken);
 
-        var saleModifiedEvent = new SaleModifiedEvent(updatedSale);
         _logger.LogInformation(
             "SaleModified event published. SaleId: {SaleId}, SaleNumber: {SaleNumber}, TotalAmount: {TotalAmount}",
-            saleModifiedEvent.Sale.Id,
-            saleModifiedEvent.Sale.SaleNumber,
-            saleModifiedEvent.Sale.TotalAmount);
+            updatedSale.Id,
+            updatedSale.SaleNumber,
+            updatedSale.TotalAmount);
 
         return _mapper.Map<UpdateSaleResult>(updatedSale);
     }

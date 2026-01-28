@@ -1,5 +1,6 @@
 using Ambev.DeveloperEvaluation.Application.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using FluentAssertions;
@@ -15,14 +16,16 @@ namespace Ambev.DeveloperEvaluation.Unit.Application;
 public class CancelSaleHandlerTests
 {
     private readonly ISaleRepository _saleRepository;
+    private readonly IEventStore _eventStore;
     private readonly ILogger<CancelSaleHandler> _logger;
     private readonly CancelSaleHandler _handler;
 
     public CancelSaleHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
+        _eventStore = Substitute.For<IEventStore>();
         _logger = Substitute.For<ILogger<CancelSaleHandler>>();
-        _handler = new CancelSaleHandler(_saleRepository, _logger);
+        _handler = new CancelSaleHandler(_saleRepository, _eventStore, _logger);
     }
 
     /// <summary>
