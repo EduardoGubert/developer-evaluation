@@ -68,6 +68,24 @@ public class Program
                     b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
                 )
             );
+           
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis")
+                    ?? "localhost:6379,password=ev@luAt10n";
+                options.InstanceName = "DeveloperStore_";
+            });
+            
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Angular", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
 
@@ -95,6 +113,8 @@ public class Program
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("Angular");
 
             app.UseAuthentication();
             app.UseAuthorization();
