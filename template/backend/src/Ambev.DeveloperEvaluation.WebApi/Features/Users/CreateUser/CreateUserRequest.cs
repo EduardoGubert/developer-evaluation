@@ -8,6 +8,11 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
 public class CreateUserRequest
 {
     /// <summary>
+    /// Gets or sets the email address. Must be a valid email format.
+    /// </summary>
+    public string Email { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the username. Must be unique and contain only valid characters.
     /// </summary>
     public string Username { get; set; } = string.Empty;
@@ -18,14 +23,19 @@ public class CreateUserRequest
     public string Password { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the phone number in format (XX) XXXXX-XXXX.
+    /// Gets or sets the user's name.
     /// </summary>
-    public string Phone { get; set; } = string.Empty;
+    public CreateUserNameRequest Name { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the email address. Must be a valid email format.
+    /// Gets or sets the user's address.
     /// </summary>
-    public string Email { get; set; } = string.Empty;
+    public CreateUserAddressRequest Address { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the phone number in international format.
+    /// </summary>
+    public string Phone { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the initial status of the user account.
