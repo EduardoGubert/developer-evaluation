@@ -27,7 +27,15 @@ public static class UserTestData
         .RuleFor(u => u.Email, f => f.Internet.Email())
         .RuleFor(u => u.Phone, f => $"+55{f.Random.Number(11, 99)}{f.Random.Number(100000000, 999999999)}")
         .RuleFor(u => u.Status, f => f.PickRandom(UserStatus.Active, UserStatus.Suspended))
-        .RuleFor(u => u.Role, f => f.PickRandom(UserRole.Customer, UserRole.Admin));
+        .RuleFor(u => u.Role, f => f.PickRandom(UserRole.Customer, UserRole.Admin))        
+        .RuleFor(u => u.Firstname, f => f.Name.FirstName())
+        .RuleFor(u => u.Lastname, f => f.Name.LastName())        
+        .RuleFor(u => u.City, f => f.Address.City())
+        .RuleFor(u => u.Street, f => f.Address.StreetName())
+        .RuleFor(u => u.Number, f => f.Random.Number(1, 9999))
+        .RuleFor(u => u.Zipcode, f => f.Address.ZipCode())
+        .RuleFor(u => u.Latitude, f => f.Address.Latitude().ToString())
+        .RuleFor(u => u.Longitude, f => f.Address.Longitude().ToString());
 
     /// <summary>
     /// Generates a valid User entity with randomized data.
