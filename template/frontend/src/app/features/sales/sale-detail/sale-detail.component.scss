@@ -1,0 +1,116 @@
+.page-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.back-button {
+  margin-bottom: 16px;
+}
+
+.sale-header-card {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.sale-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sale-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+}
+
+.sale-total {
+  text-align: right;
+
+  .total-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  .total-amount {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1976d2;
+  }
+}
+
+.sale-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.detail-item {
+  .detail-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .detail-value {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.sale-actions {
+  margin-top: 16px;
+}
+
+.items-card {
+  .full-width {
+    width: 100%;
+  }
+
+  .amount-cell {
+    font-weight: 500;
+  }
+
+  .discount-badge {
+    background-color: #fff3e0;
+    color: #e65100;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  .cancelled-row {
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+}

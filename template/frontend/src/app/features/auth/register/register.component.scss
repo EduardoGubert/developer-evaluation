@@ -1,0 +1,89 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.register-card {
+  width: 480px;
+  padding: 20px;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.section-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
+.street-field {
+  flex: 2;
+}
+
+.number-field {
+  flex: 1;
+}
+
+.submit-button {
+  margin-top: 16px;
+  height: 48px;
+  font-size: 16px;
+}
+
+.inline-spinner {
+  display: inline-block;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #666;
+
+  a {
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+mat-card-header {
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+mat-card-title {
+  font-size: 24px !important;
+  text-align: center;
+}
+
+mat-card-subtitle {
+  text-align: center;
+}

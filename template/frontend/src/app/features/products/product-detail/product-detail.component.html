@@ -1,0 +1,43 @@
+<div class="page-container">
+  <button mat-button (click)="goBack()" class="back-button">
+    <mat-icon>arrow_back</mat-icon> Back to Products
+  </button>
+
+  <app-loading [isLoading]="isLoading"></app-loading>
+
+  <mat-card *ngIf="product && !isLoading" class="product-detail-card">
+    <div class="product-detail-layout">
+      <div class="product-image-container">
+        <img [src]="product.image" [alt]="product.title" class="product-detail-image"
+             onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
+      </div>
+      <div class="product-info">
+        <div class="product-category-badge">{{ product.category }}</div>
+        <h1>{{ product.title }}</h1>
+        <div class="product-price">{{ product.price | currency:'BRL' }}</div>
+
+        <div class="product-rating" *ngIf="product.rating">
+          <mat-icon class="star-icon">star</mat-icon>
+          <span>{{ product.rating.rate }} / 5</span>
+          <span class="rating-count">({{ product.rating.count }} reviews)</span>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="product-description">
+          <h3>Description</h3>
+          <p>{{ product.description }}</p>
+        </div>
+
+        <div class="product-actions">
+          <button mat-raised-button color="primary" (click)="editProduct()">
+            <mat-icon>edit</mat-icon> Edit Product
+          </button>
+          <button mat-raised-button color="warn" (click)="deleteProduct()">
+            <mat-icon>delete</mat-icon> Delete Product
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>

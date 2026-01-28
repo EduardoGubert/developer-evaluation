@@ -1,0 +1,71 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Products</h1>
+      <button mat-raised-button color="primary" routerLink="/products/create">
+        <mat-icon>add</mat-icon> New Product
+      </button>
+    </div>
+    <div class="filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange()">
+          <mat-option value="">All Categories</mat-option>
+          <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sort by</mat-label>
+        <mat-select [(ngModel)]="orderBy" (selectionChange)="onSortChange()">
+          <mat-option value="">Default</mat-option>
+          <mat-option value="title asc">Title A-Z</mat-option>
+          <mat-option value="title desc">Title Z-A</mat-option>
+          <mat-option value="price asc">Price: Low to High</mat-option>
+          <mat-option value="price desc">Price: High to Low</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <app-loading [isLoading]="isLoading"></app-loading>
+
+  <div class="product-grid" *ngIf="!isLoading">
+    <mat-card *ngFor="let product of products" class="product-card" (click)="viewProduct(product.id)">
+      <img mat-card-image [src]="product.image" [alt]="product.title" class="product-image"
+           onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+      <mat-card-content>
+        <div class="product-category">{{ product.category }}</div>
+        <h3 class="product-title">{{ product.title }}</h3>
+        <div class="product-price">{{ product.price | currency:'BRL' }}</div>
+        <div class="product-rating" *ngIf="product.rating">
+          <mat-icon class="star-icon">star</mat-icon>
+          <span>{{ product.rating.rate }} ({{ product.rating.count }})</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button color="primary" (click)="viewProduct(product.id); $event.stopPropagation()">
+          <mat-icon>visibility</mat-icon> View
+        </button>
+        <button mat-button color="warn" (click)="deleteProduct(product.id); $event.stopPropagation()">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="no-data" *ngIf="!isLoading && products.length === 0">
+    <mat-icon>inventory_2</mat-icon>
+    <p>No products found.</p>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button mat-icon-button [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} items)</span>
+    <button mat-icon-button [disabled]="currentPage === totalPages" (click)="onPageChange(currentPage + 1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>
