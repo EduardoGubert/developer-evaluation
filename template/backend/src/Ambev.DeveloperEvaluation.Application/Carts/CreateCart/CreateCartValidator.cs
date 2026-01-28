@@ -24,7 +24,8 @@ public class CreateCartCommandValidator : AbstractValidator<CreateCartCommand>
                 .NotEmpty().WithMessage("Product ID is required.");
 
             product.RuleFor(p => p.Quantity)
-                .GreaterThan(0).WithMessage("Quantity must be greater than 0.");
+                .GreaterThan(0).WithMessage("Quantity must be greater than 0.")
+                .LessThanOrEqualTo(20).WithMessage("Cannot add more than 20 identical items.");
         });
     }
 }

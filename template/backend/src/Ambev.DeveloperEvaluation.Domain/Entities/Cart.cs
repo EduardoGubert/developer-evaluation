@@ -52,10 +52,16 @@ public class Cart : BaseEntity
     /// <returns>The cart item.</returns>
     public CartItem AddProduct(Guid productId, int quantity)
     {
+        if (quantity > 20)
+            throw new DomainException("Cannot add more than 20 identical items.");
+
         var existingItem = Products.FirstOrDefault(p => p.ProductId == productId);
         if (existingItem != null)
         {
-            existingItem.Quantity += quantity;
+            var newQuantity = existingItem.Quantity + quantity;
+            if (newQuantity > 20)
+                throw new DomainException($"Cannot have more than 20 identical items. Current: {existingItem.Quantity}, Requested: {quantity}.");
+            existingItem.Quantity = newQuantity;
             return existingItem;
         }
 

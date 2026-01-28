@@ -11,6 +11,8 @@ using Ambev.DeveloperEvaluation.Application.Carts.GetCart;
 using Ambev.DeveloperEvaluation.Application.Carts.GetCarts;
 using Ambev.DeveloperEvaluation.Application.Carts.UpdateCart;
 using Ambev.DeveloperEvaluation.Application.Carts.DeleteCart;
+using Ambev.DeveloperEvaluation.Application.Carts.CheckoutCart;
+using Ambev.DeveloperEvaluation.WebApi.Features.Carts.CheckoutCart;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Carts;
 
@@ -198,6 +200,36 @@ public class CartsController : BaseController
         {
             Success = true,
             Message = "Cart deleted successfully"
+        });
+    }
+
+    /// <summary>
+    /// Checks out a cart, creating a sale with automatic discount calculation.
+    /// </summary>
+    /// <param name="id">The cart ID to checkout.</param>
+    /// <param name="request">The checkout request with branch information.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The created sale details with discounts.</returns>
+    [HttpPost("{id}/checkout")]
+    [ProducesResponseType(typeof(ApiResponseWithData<CheckoutCartResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CheckoutCart([FromRoute] Guid id, [FromBody] CheckoutCartRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CheckoutCartCommand
+        {
+            CartId = id,
+            BranchId = request.BranchId,
+            BranchName = request.BranchName
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok(new ApiResponseWithData<CheckoutCartResponse>
+        {
+            Success = true,
+            Message = "Cart checked out successfully. Sale created.",
+            Data = _mapper.Map<CheckoutCartResponse>(response)
         });
     }
 }
