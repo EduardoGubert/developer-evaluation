@@ -1,5 +1,3 @@
-using Ambev.DeveloperEvaluation.Domain.Enums;
-
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 
 /// <summary>
@@ -13,14 +11,24 @@ public class GetUserResponse
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The user's full name
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
     /// The user's email address
     /// </summary>
     public string Email { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The user's username
+    /// </summary>
+    public string Username { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The user's name (firstname and lastname)
+    /// </summary>
+    public GetUserNameResponse Name { get; set; } = new();
+
+    /// <summary>
+    /// The user's address
+    /// </summary>
+    public GetUserAddressResponse Address { get; set; } = new();
 
     /// <summary>
     /// The user's phone number
@@ -30,10 +38,10 @@ public class GetUserResponse
     /// <summary>
     /// The user's role in the system
     /// </summary>
-    public UserRole Role { get; set; }
+    public string Role { get; set; } = string.Empty;
 
     /// <summary>
     /// The current status of the user
     /// </summary>
-    public UserStatus Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 }
