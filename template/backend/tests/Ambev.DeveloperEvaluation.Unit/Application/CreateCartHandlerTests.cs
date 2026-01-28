@@ -66,7 +66,7 @@ public class CreateCartHandlerTests
     public async Task Handle_InvalidRequest_ThrowsValidationException()
     {
         // Given
-        var command = new CreateCartCommand(); // Empty command will fail validation
+        var command = new CreateCartCommand();
 
         // When
         var act = () => _handler.Handle(command, CancellationToken.None);
