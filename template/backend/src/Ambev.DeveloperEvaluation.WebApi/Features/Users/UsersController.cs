@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUsers;
@@ -53,7 +54,12 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<CreateUserCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
@@ -116,7 +122,12 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<GetUserCommand>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
@@ -146,7 +157,12 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<UpdateUserCommand>(request);
         command.Id = id;
@@ -177,7 +193,12 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<DeleteUserCommand>(request.Id);
         await _mediator.Send(command, cancellationToken);

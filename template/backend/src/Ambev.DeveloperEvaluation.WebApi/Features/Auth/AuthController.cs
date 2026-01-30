@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Features.Auth.AuthenticateUserFeature;
 using Ambev.DeveloperEvaluation.Application.Auth.AuthenticateUser;
 
@@ -46,7 +47,12 @@ public class AuthController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<AuthenticateUserCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);

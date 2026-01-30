@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Features.Carts.CreateCart;
 using Ambev.DeveloperEvaluation.WebApi.Features.Carts.GetCart;
 using Ambev.DeveloperEvaluation.WebApi.Features.Carts.GetCarts;
@@ -48,7 +49,12 @@ public class CartsController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<CreateCartCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
@@ -161,7 +167,12 @@ public class CartsController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<UpdateCartCommand>(request);
         command.Id = id;

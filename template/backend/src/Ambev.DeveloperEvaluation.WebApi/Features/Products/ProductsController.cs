@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProducts;
@@ -47,7 +48,12 @@ public class ProductsController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<CreateProductCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
@@ -166,7 +172,12 @@ public class ProductsController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<UpdateProductCommand>(request);
         command.Id = id;

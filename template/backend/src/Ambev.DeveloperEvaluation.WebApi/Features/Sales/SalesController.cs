@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
@@ -45,7 +46,12 @@ public class SalesController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = _mapper.Map<CreateSaleCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
@@ -138,7 +144,12 @@ public class SalesController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation Failed",
+                Errors = validationResult.Errors.Select(error => (ValidationErrorDetail)error)
+            });
 
         var command = new UpdateSaleCommand
         {
