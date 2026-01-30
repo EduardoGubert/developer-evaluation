@@ -126,5 +126,5 @@
 <br>
 <div style="display: flex; justify-content: space-between;">
   <a href="./products-api.md">Previous: Products API</a>
-  <a href="./users-api.md">Next: Users API</a>
+  <a href="./sales-api.md">Next: Sales API</a>
 </div>

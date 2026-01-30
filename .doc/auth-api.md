@@ -3,19 +3,26 @@
 
 ### Authentication
 
-#### POST /auth/login
+#### POST /api/auth
 - Description: Authenticate a user
 - Request Body:
   ```json
   {
-    "username": "string",
+    "email": "string",
     "password": "string"
   }
   ```
 - Response: 
   ```json
   {
-    "token": "string"
+    "success": true,
+    "message": "Authentication successful",
+    "data": {
+      "token": "string",
+      "email": "string",
+      "name": "string",
+      "role": "string"
+    }
   }
   ```
 

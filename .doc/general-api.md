@@ -109,44 +109,73 @@ The API uses conventional HTTP response codes to indicate the success or failure
 
 ### Error Response Format
 
+Errors are returned using the standard `ApiResponse` shape with an `errors` array.
+
 ```json
 {
-  "type": "string",
-  "error": "string",
-  "detail": "string"
+  "success": false,
+  "message": "Validation Failed",
+  "errors": [
+    {
+      "type": "ValidationError",
+      "error": "Invalid input data",
+      "detail": "The 'price' field must be a positive number"
+    }
+  ]
 }
 ```
 
-- `type`: A machine-readable error type identifier
-- `error`: A short, human-readable summary of the problem
-- `detail`: A human-readable explanation specific to this occurrence of the problem
+- `success`: Indicates the request failed
+- `message`: Human-readable summary of the failure
+- `errors`: List of error details
+- `errors[].type`: A machine-readable error type identifier
+- `errors[].error`: A short, human-readable summary
+- `errors[].detail`: A human-readable explanation specific to this occurrence
 
 Example error responses:
 
 1. Resource Not Found
 ```json
 {
-  "type": "ResourceNotFound",
-  "error": "Product not found",
-  "detail": "The product with ID 12345 does not exist in our database"
+  "success": false,
+  "message": "Resource not found",
+  "errors": [
+    {
+      "type": "ResourceNotFound",
+      "error": "Resource not found",
+      "detail": "The product with ID 12345 does not exist in our database"
+    }
+  ]
 }
 ```
 
 2. Authentication Error
 ```json
 {
-  "type": "AuthenticationError",
-  "error": "Invalid authentication token",
-  "detail": "The provided authentication token has expired or is invalid"
+  "success": false,
+  "message": "Authentication failed",
+  "errors": [
+    {
+      "type": "AuthenticationError",
+      "error": "Invalid authentication token",
+      "detail": "The provided authentication token has expired or is invalid"
+    }
+  ]
 }
 ```
 
 3. Validation Error
 ```json
 {
-  "type": "ValidationError",
-  "error": "Invalid input data",
-  "detail": "The 'price' field must be a positive number"
+  "success": false,
+  "message": "Validation Failed",
+  "errors": [
+    {
+      "type": "ValidationError",
+      "error": "Invalid input data",
+      "detail": "The 'price' field must be a positive number"
+    }
+  ]
 }
 ```
 

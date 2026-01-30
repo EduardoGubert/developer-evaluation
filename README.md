@@ -70,17 +70,115 @@ This section outlines the frameworks and libraries that are leveraged in the pro
 
 See [Frameworks](/.doc/frameworks.md)
 
-<!-- 
 ## API Structure
 This section includes links to the detailed documentation for the different API resources:
-- [API General](./docs/general-api.md)
+- [API General](/.doc/general-api.md)
 - [Products API](/.doc/products-api.md)
 - [Carts API](/.doc/carts-api.md)
+- [Sales API](/.doc/sales-api.md)
 - [Users API](/.doc/users-api.md)
 - [Auth API](/.doc/auth-api.md)
--->
 
 ## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
+This section describes the overall structure and organization of the project files and directories.
 
 See [Project Structure](/.doc/project-structure.md)
+
+## Getting Started
+
+### Prerequisites
+- [Docker](https://www.docker.com/) and Docker Compose
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js 18+](https://nodejs.org/) (for the Angular frontend)
+- Git
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd developer-evaluation
+```
+
+### 2. Start Infrastructure Services
+The project requires PostgreSQL, MongoDB, and Redis. Start them using Docker Compose:
+
+```bash
+cd template/backend
+docker-compose up -d ambev.developerevaluation.database ambev.developerevaluation.nosql ambev.developerevaluation.cache
+```
+
+This starts:
+- **PostgreSQL 13** (port 5432): Main relational database
+- **MongoDB 8.0** (port 27017): NoSQL database for event store
+- **Redis 7.4.1** (port 6379): Cache layer
+
+Default credentials:
+| Service    | User        | Password     | Database/DB            |
+|------------|-------------|--------------|------------------------|
+| PostgreSQL | `developer` | `ev@luAt10n` | `developer_evaluation` |
+| MongoDB    | `developer` | `ev@luAt10n` | `developer_evaluation` |
+| Redis      | -           | `ev@luAt10n` | -                      |
+
+### 3. Configure Connection Strings
+Check the mapped ports from Docker:
+```bash
+docker-compose ps
+```
+
+Update `template/backend/src/Ambev.DeveloperEvaluation.WebApi/appsettings.Development.json` with the correct ports:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=<POSTGRES_PORT>;Database=developer_evaluation;Username=developer;Password=ev@luAt10n",
+    "Redis": "localhost:<REDIS_PORT>,password=ev@luAt10n",
+    "MongoDB": "mongodb://developer:ev%40luAt10n@localhost:<MONGO_PORT>/developer_evaluation?authSource=admin"
+  }
+}
+```
+
+### 4. Apply Database Migrations
+```bash
+cd template/backend
+dotnet ef database update --startup-project src/Ambev.DeveloperEvaluation.WebApi --project src/Ambev.DeveloperEvaluation.ORM
+```
+
+### 5. Run the API
+```bash
+cd template/backend/src/Ambev.DeveloperEvaluation.WebApi
+dotnet run
+```
+
+The API will be available at:
+- HTTP: `http://localhost:5119`
+- HTTPS: `https://localhost:7181`
+
+### 6. Access Swagger
+Open your browser and navigate to:
+```
+http://localhost:5119/swagger
+```
+
+Swagger provides an interactive UI to test all API endpoints. Use the "Authorize" button to insert a JWT token for authenticated requests.
+
+### 7. Running Tests
+
+```bash
+cd template/backend
+
+# Run all tests
+dotnet test
+
+# Run only unit tests
+dotnet test tests/Ambev.DeveloperEvaluation.Unit
+
+# Run only integration tests
+dotnet test tests/Ambev.DeveloperEvaluation.Integration
+```
+
+### 8. Frontend (Angular)
+```bash
+cd template/frontend
+npm install
+ng serve
+```
+The frontend will be available at `http://localhost:4200`.
