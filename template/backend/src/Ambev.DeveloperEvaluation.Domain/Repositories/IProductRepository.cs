@@ -35,6 +35,7 @@ public interface IProductRepository
         int page = 1,
         int size = 10,
         string? order = null,
+        Dictionary<string, string>? filters = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

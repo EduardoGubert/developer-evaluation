@@ -37,12 +37,14 @@ public interface ISaleRepository
     /// <param name="page">The page number (1-based).</param>
     /// <param name="size">The number of items per page.</param>
     /// <param name="order">Optional ordering string (e.g., "saleDate desc").</param>
+    /// <param name="filters">Filters to apply to the query.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A tuple containing the sales and the total count.</returns>
     Task<(IEnumerable<Sale> Sales, int TotalCount)> GetAllAsync(
         int page = 1,
         int size = 10,
         string? order = null,
+        Dictionary<string, string>? filters = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

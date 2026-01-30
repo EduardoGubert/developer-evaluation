@@ -37,12 +37,14 @@ public interface ICartRepository
     /// <param name="page">Page number.</param>
     /// <param name="size">Page size.</param>
     /// <param name="order">Ordering string.</param>
+    /// <param name="filters">Filters to apply.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A tuple with carts and total count.</returns>
     Task<(IEnumerable<Cart> Carts, int TotalCount)> GetAllAsync(
         int page = 1,
         int size = 10,
         string? order = null,
+        Dictionary<string, string>? filters = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

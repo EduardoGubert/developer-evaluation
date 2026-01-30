@@ -51,7 +51,8 @@ public interface IUserRepository
         int page = 1,
         int size = 10,
         string? order = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        Dictionary<string, string>? filters = null);
 
     /// <summary>
     /// Updates an existing user in the repository
