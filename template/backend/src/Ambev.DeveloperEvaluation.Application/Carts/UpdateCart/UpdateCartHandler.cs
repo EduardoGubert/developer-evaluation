@@ -49,14 +49,12 @@ public class UpdateCartHandler : IRequestHandler<UpdateCartCommand, UpdateCartRe
                 newItems.Add(newItem);
             }
         }
-
-        // INSERT new CartItems first (before Update marks everything as Modified)
+        
         foreach (var newItem in newItems)
         {
             await _cartRepository.CreateItemAsync(newItem, cancellationToken);
         }
-
-        // UPDATE cart and existing items (quantity changes)
+                
         var updatedCart = await _cartRepository.UpdateAsync(existingCart, cancellationToken);
 
         return new UpdateCartResult

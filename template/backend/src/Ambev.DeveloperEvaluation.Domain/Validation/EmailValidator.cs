@@ -20,8 +20,7 @@ public class EmailValidator : AbstractValidator<string>
     {
         if (string.IsNullOrWhiteSpace(email))
             return false;
-
-        // More strict email validation
+                
         var regex = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
         return regex.IsMatch(email);
     }

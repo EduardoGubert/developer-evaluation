@@ -31,8 +31,7 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
             .MinimumLength(8).WithMessage("Phone must have at least 8 characters.");
         RuleFor(user => user.Status).NotEqual(UserStatus.Unknown);
         RuleFor(user => user.Role).NotEqual(UserRole.None);
-
-        // Name validation
+                
         RuleFor(user => user.Name).NotNull().WithMessage("Name is required.");
         RuleFor(user => user.Name.Firstname)
             .NotEmpty().WithMessage("First name is required.")
@@ -40,8 +39,7 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
         RuleFor(user => user.Name.Lastname)
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(100).WithMessage("Last name cannot exceed 100 characters.");
-
-        // Address validation
+                
         RuleFor(user => user.Address).NotNull().WithMessage("Address is required.");
         RuleFor(user => user.Address.City)
             .NotEmpty().WithMessage("City is required.")

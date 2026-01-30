@@ -45,8 +45,7 @@ public class CancelSaleItemHandler : IRequestHandler<CancelSaleItemCommand, Canc
             throw new KeyNotFoundException($"Item with ID {request.ItemId} not found or already cancelled");
 
         await _saleRepository.UpdateAsync(sale, cancellationToken);
-
-        // Persist event to MongoDB audit log
+               
         await _eventStore.AppendAsync(
             eventType: "ItemCancelled",
             aggregateId: sale.Id.ToString(),

@@ -48,36 +48,31 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, UpdateUserRe
         var existingUser = await _userRepository.GetByIdAsync(command.Id, cancellationToken);
         if (existingUser == null)
             throw new KeyNotFoundException($"User with ID {command.Id} not found");
-
-        // Check if email is being changed and if it's already taken
+                
         if (existingUser.Email != command.Email)
         {
             var userWithEmail = await _userRepository.GetByEmailAsync(command.Email, cancellationToken);
             if (userWithEmail != null)
                 throw new InvalidOperationException($"User with email {command.Email} already exists");
         }
-
-        // Update user properties
+                
         existingUser.Username = command.Username;
         existingUser.Email = command.Email;
         existingUser.Phone = command.Phone;
         existingUser.Status = command.Status;
         existingUser.Role = command.Role;
         existingUser.UpdatedAt = DateTime.UtcNow;
-
-        // Update name properties
+                
         existingUser.Firstname = command.Name.Firstname;
         existingUser.Lastname = command.Name.Lastname;
-
-        // Update address properties
+                
         existingUser.City = command.Address.City;
         existingUser.Street = command.Address.Street;
         existingUser.Number = command.Address.Number;
         existingUser.Zipcode = command.Address.Zipcode;
         existingUser.Latitude = command.Address.Geolocation.Lat;
         existingUser.Longitude = command.Address.Geolocation.Long;
-
-        // Update password only if provided
+                
         if (!string.IsNullOrEmpty(command.Password))
         {
             existingUser.Password = _passwordHasher.HashPassword(command.Password);

@@ -160,8 +160,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
                     Detail = exception.Message
                 }
             };
-
-            // Include inner exception if present
+                        
             if (exception.InnerException != null)
             {
                 errors.Add(new ValidationErrorDetail

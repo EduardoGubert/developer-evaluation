@@ -43,21 +43,18 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
 
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
-
-        // 1. Get the cart
+                
         var cart = await _cartRepository.GetByIdAsync(command.CartId, cancellationToken);
         if (cart == null)
             throw new KeyNotFoundException($"Cart with ID {command.CartId} not found.");
 
         if (cart.Products == null || cart.Products.Count == 0)
             throw new InvalidOperationException("Cannot checkout an empty cart.");
-
-        // 2. Get the user for CustomerName
+              
         var user = await _userRepository.GetByIdAsync(cart.UserId, cancellationToken);
         if (user == null)
             throw new KeyNotFoundException($"User with ID {cart.UserId} not found.");
-
-        // 3. Create the sale
+                
         var sale = new Sale
         {
             CustomerId = cart.UserId,
@@ -66,13 +63,11 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
             BranchName = command.BranchName,
             SaleNumber = GenerateSaleNumber()
         };
-
-        // 4. Batch load all products at once to avoid N+1 queries
+                
         var productIds = cart.Products.Select(p => p.ProductId).ToList();
         var products = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
         var productDict = products.ToDictionary(p => p.Id);
-
-        // 5. For each cart item, add to sale using cached product details
+                
         foreach (var cartItem in cart.Products)
         {
             if (!productDict.TryGetValue(cartItem.ProductId, out var product))
@@ -84,11 +79,9 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
                 cartItem.Quantity,
                 product.Price);
         }
-
-        // 6. Save the sale
+                
         var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
-
-        // 7. Publish SaleCreated event
+                
         await _eventStore.AppendAsync(
             eventType: "SaleCreated",
             aggregateId: createdSale.Id.ToString(),
@@ -110,11 +103,9 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
         _logger.LogInformation(
             "Cart checked out. CartId: {CartId}, SaleId: {SaleId}, SaleNumber: {SaleNumber}, TotalAmount: {TotalAmount}",
             cart.Id, createdSale.Id, createdSale.SaleNumber, createdSale.TotalAmount);
-
-        // 8. Delete the cart (consumed)
+                
         await _cartRepository.DeleteAsync(cart.Id, cancellationToken);
-
-        // 9. Build result
+                
         return new CheckoutCartResult
         {
             SaleId = createdSale.Id,

@@ -40,7 +40,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .NotEqual(UserRole.None)
             .WithMessage("User role cannot be None.");
 
-        // Name validation
+        
         RuleFor(x => x.Name).NotNull().WithMessage("Name is required.");
         RuleFor(x => x.Name.Firstname)
             .NotEmpty().WithMessage("First name is required.")
@@ -49,7 +49,7 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(100).WithMessage("Last name cannot exceed 100 characters.");
 
-        // Address validation
+        
         RuleFor(x => x.Address).NotNull().WithMessage("Address is required.");
         RuleFor(x => x.Address.City)
             .NotEmpty().WithMessage("City is required.")

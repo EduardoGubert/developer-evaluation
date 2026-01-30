@@ -22,8 +22,7 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
         RuleFor(user => user.Phone).Matches(@"^\+?[1-9]\d{1,14}$");
         RuleFor(user => user.Status).NotEqual(UserStatus.Unknown);
         RuleFor(user => user.Role).NotEqual(UserRole.None);
-
-        // Name validation
+               
         RuleFor(user => user.Name).NotNull().WithMessage("Name is required.");
         RuleFor(user => user.Name.Firstname)
             .NotEmpty().WithMessage("First name is required.")
@@ -31,8 +30,7 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
         RuleFor(user => user.Name.Lastname)
             .NotEmpty().WithMessage("Last name is required.")
             .MaximumLength(100).WithMessage("Last name cannot exceed 100 characters.");
-
-        // Address validation
+                
         RuleFor(user => user.Address).NotNull().WithMessage("Address is required.");
         RuleFor(user => user.Address.City)
             .NotEmpty().WithMessage("City is required.")
