@@ -9,7 +9,7 @@
     <div class="product-detail-layout">
       <div class="product-image-container">
         <img [src]="product.image" [alt]="product.title" class="product-detail-image"
-                 onerror="this.src='/assets/images/image-placeholder.png'"/>
+                 onerror="this.src='/assets/images/image-placeholder.svg'"/>
       </div>
       <div class="product-info">
         <div class="product-category-badge">{{ product.category }}</div>
@@ -39,14 +39,6 @@
           </button>
         </div>
 
-        <div class="product-actions">
-          <button mat-raised-button color="primary" (click)="editProduct()">
-            <mat-icon>edit</mat-icon> Edit Product
-          </button>
-          <button mat-raised-button color="warn" (click)="deleteProduct()">
-            <mat-icon>delete</mat-icon> Delete Product
-          </button>
-        </div>
       </div>
     </div>
   </mat-card>

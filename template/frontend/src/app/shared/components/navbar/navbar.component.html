@@ -5,10 +5,6 @@
     <mat-icon>inventory_2</mat-icon>
     Products
   </button>
-  <button mat-button routerLink="/sales" routerLinkActive="active">
-    <mat-icon>point_of_sale</mat-icon>
-    Sales
-  </button>
   <button mat-button routerLink="/cart" routerLinkActive="active">
     <mat-icon [matBadge]="(cartItemCount$ | async) || null"
               matBadgeColor="accent"

@@ -1,3 +1,8 @@
+<div class="checkout-overlay" *ngIf="isCheckingOut">
+  <mat-spinner diameter="50"></mat-spinner>
+  <p>Processing your order...</p>
+</div>
+
 <div class="page-container">
   <div class="page-header">
     <h1>Shopping Cart</h1>
@@ -15,7 +20,7 @@
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let item">
             <img [src]="item.productImage" [alt]="item.productName" class="cart-item-image"
-                 onerror="this.src='/assets/images/image-placeholder.png'"/>
+                 onerror="this.src='/assets/images/image-placeholder.svg'"/>
           </td>
         </ng-container>
 
@@ -91,13 +96,8 @@
       </div>
 
       <div class="checkout-section">
-        <mat-form-field appearance="outline" class="branch-field">
-          <mat-label>Branch Name</mat-label>
-          <input matInput [(ngModel)]="branchName" placeholder="e.g. Downtown Store">
-        </mat-form-field>
-
         <button mat-raised-button color="primary" class="checkout-btn"
-                (click)="checkout()" [disabled]="isCheckingOut || !branchName.trim()">
+                (click)="checkout()" [disabled]="isCheckingOut">
           <mat-icon>payment</mat-icon>
           <span *ngIf="!isCheckingOut">Checkout</span>
           <span *ngIf="isCheckingOut">Processing...</span>

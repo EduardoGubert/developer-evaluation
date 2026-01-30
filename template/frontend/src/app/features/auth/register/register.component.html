@@ -5,35 +5,51 @@
       <mat-card-subtitle>Create your account</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <form (ngSubmit)="onSubmit()" class="register-form">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>First Name</mat-label>
-            <input matInput [(ngModel)]="user.name.firstname" name="firstname" required>
+            <input matInput formControlName="firstname">
+            <mat-error *ngIf="f['firstname'].hasError('required')">First name is required</mat-error>
+            <mat-error *ngIf="f['firstname'].hasError('maxlength')">Maximum 100 characters</mat-error>
+            <mat-error *ngIf="backendErrors['firstname']">{{ backendErrors['firstname'] }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Last Name</mat-label>
-            <input matInput [(ngModel)]="user.name.lastname" name="lastname" required>
+            <input matInput formControlName="lastname">
+            <mat-error *ngIf="f['lastname'].hasError('required')">Last name is required</mat-error>
+            <mat-error *ngIf="f['lastname'].hasError('maxlength')">Maximum 100 characters</mat-error>
+            <mat-error *ngIf="backendErrors['lastname']">{{ backendErrors['lastname'] }}</mat-error>
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput type="email" [(ngModel)]="user.email" name="email" required>
+          <input matInput type="email" formControlName="email">
           <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="f['email'].hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="f['email'].hasError('email')">Invalid email format</mat-error>
+          <mat-error *ngIf="backendErrors['email']">{{ backendErrors['email'] }}</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Username</mat-label>
-          <input matInput [(ngModel)]="user.username" name="username" required>
+          <input matInput formControlName="username">
           <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="f['username'].hasError('required')">Username is required</mat-error>
+          <mat-error *ngIf="f['username'].hasError('minlength')">Minimum 3 characters</mat-error>
+          <mat-error *ngIf="f['username'].hasError('maxlength')">Maximum 50 characters</mat-error>
+          <mat-error *ngIf="backendErrors['username']">{{ backendErrors['username'] }}</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Phone</mat-label>
-          <input matInput [(ngModel)]="user.phone" name="phone" placeholder="+5511999999999">
+          <input matInput formControlName="phone" placeholder="(67) 99999-9999">
           <mat-icon matSuffix>phone</mat-icon>
+          <mat-error *ngIf="f['phone'].hasError('required')">Phone is required</mat-error>
+          <mat-error *ngIf="f['phone'].hasError('minlength')">Minimum 8 characters</mat-error>
+          <mat-error *ngIf="backendErrors['phone']">{{ backendErrors['phone'] }}</mat-error>
         </mat-form-field>
 
         <div class="section-label">Address</div>
@@ -41,38 +57,61 @@
         <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>City</mat-label>
-            <input matInput [(ngModel)]="user.address.city" name="city">
+            <input matInput formControlName="city">
+            <mat-error *ngIf="f['city'].hasError('required')">City is required</mat-error>
+            <mat-error *ngIf="backendErrors['city']">{{ backendErrors['city'] }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Zipcode</mat-label>
-            <input matInput [(ngModel)]="user.address.zipcode" name="zipcode">
+            <input matInput formControlName="zipcode">
+            <mat-error *ngIf="f['zipcode'].hasError('required')">Zipcode is required</mat-error>
+            <mat-error *ngIf="backendErrors['zipcode']">{{ backendErrors['zipcode'] }}</mat-error>
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="street-field">
             <mat-label>Street</mat-label>
-            <input matInput [(ngModel)]="user.address.street" name="street">
+            <input matInput formControlName="street">
+            <mat-error *ngIf="f['street'].hasError('required')">Street is required</mat-error>
+            <mat-error *ngIf="backendErrors['street']">{{ backendErrors['street'] }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="number-field">
             <mat-label>Number</mat-label>
-            <input matInput type="number" [(ngModel)]="user.address.number" name="number">
+            <input matInput type="number" formControlName="number">
+            <mat-error *ngIf="f['number'].hasError('required')">Number is required</mat-error>
+            <mat-error *ngIf="f['number'].hasError('min')">Must be greater than 0</mat-error>
+            <mat-error *ngIf="backendErrors['number']">{{ backendErrors['number'] }}</mat-error>
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="user.password" name="password" required>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
           <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
             <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
           </button>
+          <mat-hint>Min 8 chars, uppercase, lowercase, number, special char</mat-hint>
+          <mat-error *ngIf="f['password'].hasError('required')">Password is required</mat-error>
+          <mat-error *ngIf="backendErrors['password']">{{ backendErrors['password'] }}</mat-error>
         </mat-form-field>
+
+        <div class="password-requirements" *ngIf="f['password'].value && f['password'].touched">
+          <div *ngFor="let err of getPasswordErrors()" class="requirement-error">
+            <mat-icon>close</mat-icon> {{ err }}
+          </div>
+          <div *ngIf="isPasswordValid()" class="requirement-valid">
+            <mat-icon>check</mat-icon> Password meets all requirements
+          </div>
+        </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Confirm Password</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="confirmPassword">
+          <mat-error *ngIf="f['confirmPassword'].hasError('required')">Confirm password is required</mat-error>
+          <mat-error *ngIf="registerForm.hasError('mismatch') && f['confirmPassword'].touched">Passwords do not match</mat-error>
         </mat-form-field>
 
         <button mat-raised-button color="primary" type="submit" class="full-width submit-button" [disabled]="isLoading">

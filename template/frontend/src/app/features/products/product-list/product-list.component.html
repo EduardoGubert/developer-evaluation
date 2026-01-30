@@ -2,9 +2,6 @@
   <div class="page-header">
     <div class="header-left">
       <h1>Products</h1>
-      <button mat-raised-button color="primary" routerLink="/products/create">
-        <mat-icon>add</mat-icon> New Product
-      </button>
     </div>
     <div class="filters">
       <mat-form-field appearance="outline">
@@ -33,7 +30,7 @@
   <div class="product-grid" *ngIf="!isLoading">
     <mat-card *ngFor="let product of products" class="product-card" (click)="viewProduct(product.id)">
       <img [src]="product.image" [alt]="product.title" class="product-image"
-                 onerror="this.src='/assets/images/image-placeholder.png'"/>
+                 onerror="this.src='/assets/images/image-placeholder.svg'"/>
       <mat-card-content>
         <div class="product-category">{{ product.category }}</div>
         <h3 class="product-title">{{ product.title }}</h3>
@@ -49,9 +46,6 @@
         </button>
         <button mat-button color="accent" (click)="addToCart(product, $event)">
           <mat-icon>add_shopping_cart</mat-icon> Add to Cart
-        </button>
-        <button mat-button color="warn" (click)="deleteProduct(product.id); $event.stopPropagation()">
-          <mat-icon>delete</mat-icon> Delete
         </button>
       </mat-card-actions>
     </mat-card>

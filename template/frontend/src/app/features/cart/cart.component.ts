@@ -26,7 +26,7 @@ export class CartComponent implements OnInit, OnDestroy {
   cartItems: CartItemDisplay[] = [];
   isLoading = false;
   isCheckingOut = false;
-  branchName = '';
+  branchName = 'Site';
   displayedColumns = ['image', 'product', 'price', 'quantity', 'subtotal', 'actions'];
 
   private cartSub!: Subscription;
@@ -109,18 +109,13 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   checkout(): void {
-    if (!this.branchName.trim()) {
-      this.snackBar.open('Please enter a branch name', 'Close', { duration: 3000 });
-      return;
-    }
-
     this.isCheckingOut = true;
     const branchId = crypto.randomUUID();
-    this.shoppingCartService.checkout(branchId, this.branchName.trim()).subscribe({
+    this.shoppingCartService.checkout(branchId, this.branchName).subscribe({
       next: (response) => {
         this.isCheckingOut = false;
         if (response) {
-          this.router.navigate(['/sales']);
+          this.router.navigate(['/products']);
         }
       },
       error: () => {
