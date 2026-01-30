@@ -21,4 +21,9 @@ public class GetUsersCommand : IRequest<GetUsersResult>
     /// Gets or sets the ordering string (e.g., "username asc, email desc").
     /// </summary>
     public string? Order { get; set; }
+
+    /// <summary>
+    /// Gets or sets the filters to apply to the query.
+    /// </summary>
+    public Dictionary<string, string> Filters { get; set; } = new();
 }

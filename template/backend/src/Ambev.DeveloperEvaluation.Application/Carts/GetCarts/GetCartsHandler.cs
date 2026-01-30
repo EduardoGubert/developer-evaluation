@@ -24,6 +24,7 @@ public class GetCartsHandler : IRequestHandler<GetCartsCommand, GetCartsResult>
             command.Page,
             command.Size,
             command.Order,
+            command.Filters,
             cancellationToken);
 
         var totalPages = (int)Math.Ceiling((double)totalCount / command.Size);

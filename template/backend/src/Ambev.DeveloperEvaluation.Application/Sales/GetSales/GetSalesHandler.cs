@@ -24,6 +24,7 @@ public class GetSalesHandler : IRequestHandler<GetSalesCommand, GetSalesResult>
             request.Page,
             request.Size,
             request.Order,
+            request.Filters,
             cancellationToken);
 
         var salesList = sales.ToList();

@@ -24,7 +24,8 @@ public class GetUsersHandler : IRequestHandler<GetUsersCommand, GetUsersResult>
             request.Page,
             request.Size,
             request.Order,
-            cancellationToken);
+            cancellationToken,
+            request.Filters);
 
         var usersList = users.ToList();
         var totalPages = (int)Math.Ceiling(totalCount / (double)request.Size);

@@ -27,16 +27,18 @@ public class GetProductsHandler : IRequestHandler<GetProductsCommand, GetProduct
 
     public async Task<GetProductsResult> Handle(GetProductsCommand command, CancellationToken cancellationToken)
     {
-        var cacheKey = $"products:all:{command.Page}:{command.Size}:{command.Order ?? "default"}";
+        var filterKey = string.Join("&", command.Filters.OrderBy(f => f.Key).Select(f => $"{f.Key}={f.Value}"));
+        var cacheKey = $"products:all:{command.Page}:{command.Size}:{command.Order ?? "default"}:{filterKey}";
 
         var cached = await _cache.GetAsync<GetProductsResult>(cacheKey, cancellationToken);
         if (cached != null)
             return cached;
-        
+
         var (products, totalCount) = await _productRepository.GetAllAsync(
             command.Page,
             command.Size,
             command.Order,
+            command.Filters,
             cancellationToken);
 
         var totalPages = (int)Math.Ceiling((double)totalCount / command.Size);
