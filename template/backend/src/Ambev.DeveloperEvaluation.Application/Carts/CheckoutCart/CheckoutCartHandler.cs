@@ -67,11 +67,15 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
             SaleNumber = GenerateSaleNumber()
         };
 
-        // 4. For each cart item, get product details and add to sale
+        // 4. Batch load all products at once to avoid N+1 queries
+        var productIds = cart.Products.Select(p => p.ProductId).ToList();
+        var products = await _productRepository.GetByIdsAsync(productIds, cancellationToken);
+        var productDict = products.ToDictionary(p => p.Id);
+
+        // 5. For each cart item, add to sale using cached product details
         foreach (var cartItem in cart.Products)
         {
-            var product = await _productRepository.GetByIdAsync(cartItem.ProductId, cancellationToken);
-            if (product == null)
+            if (!productDict.TryGetValue(cartItem.ProductId, out var product))
                 throw new KeyNotFoundException($"Product with ID {cartItem.ProductId} not found.");
 
             sale.AddItem(
@@ -81,10 +85,10 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
                 product.Price);
         }
 
-        // 5. Save the sale
+        // 6. Save the sale
         var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
 
-        // 6. Publish SaleCreated event
+        // 7. Publish SaleCreated event
         await _eventStore.AppendAsync(
             eventType: "SaleCreated",
             aggregateId: createdSale.Id.ToString(),
@@ -107,10 +111,10 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand, Checkout
             "Cart checked out. CartId: {CartId}, SaleId: {SaleId}, SaleNumber: {SaleNumber}, TotalAmount: {TotalAmount}",
             cart.Id, createdSale.Id, createdSale.SaleNumber, createdSale.TotalAmount);
 
-        // 7. Delete the cart (consumed)
+        // 8. Delete the cart (consumed)
         await _cartRepository.DeleteAsync(cart.Id, cancellationToken);
 
-        // 8. Build result
+        // 9. Build result
         return new CheckoutCartResult
         {
             SaleId = createdSale.Id,
