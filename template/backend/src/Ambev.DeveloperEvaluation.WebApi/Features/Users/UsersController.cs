@@ -82,8 +82,13 @@ public class UsersController : BaseController
         [FromQuery(Name = "_order")] string? order = null,
         CancellationToken cancellationToken = default)
     {
+        var filters = HttpContext.Request.Query
+            .Where(q => q.Key != "_page" && q.Key != "_size" && q.Key != "_order")
+            .ToDictionary(q => q.Key, q => q.Value.ToString());
+
         var request = new GetUsersRequest { Page = page, Size = size, Order = order };
         var command = _mapper.Map<GetUsersCommand>(request);
+        command.Filters = filters;
         var response = await _mediator.Send(command, cancellationToken);
 
         return Ok(new ApiResponseWithData<GetUsersResponse>

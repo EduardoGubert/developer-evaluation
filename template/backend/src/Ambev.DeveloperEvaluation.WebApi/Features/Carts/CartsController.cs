@@ -77,7 +77,11 @@ public class CartsController : BaseController
         [FromQuery(Name = "_order")] string? order = null,
         CancellationToken cancellationToken = default)
     {
-        var command = new GetCartsCommand { Page = page, Size = size, Order = order };
+        var filters = HttpContext.Request.Query
+            .Where(q => q.Key != "_page" && q.Key != "_size" && q.Key != "_order")
+            .ToDictionary(q => q.Key, q => q.Value.ToString());
+
+        var command = new GetCartsCommand { Page = page, Size = size, Order = order, Filters = filters };
         var response = await _mediator.Send(command, cancellationToken);
 
         var result = new GetCartsResponse

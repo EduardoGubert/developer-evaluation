@@ -79,7 +79,16 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             var response = new ApiResponse
             {
                 Success = false,
-                Message = exception.Message
+                Message = exception.Message,
+                Errors = new[]
+                {
+                    new ValidationErrorDetail
+                    {
+                        Type = "ResourceNotFound",
+                        Error = "Resource not found",
+                        Detail = exception.Message
+                    }
+                }
             };
 
             var jsonOptions = new JsonSerializerOptions
@@ -98,7 +107,16 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             var response = new ApiResponse
             {
                 Success = false,
-                Message = exception.Message
+                Message = exception.Message,
+                Errors = new[]
+                {
+                    new ValidationErrorDetail
+                    {
+                        Type = "BusinessRuleViolation",
+                        Error = "Invalid operation",
+                        Detail = exception.Message
+                    }
+                }
             };
 
             var jsonOptions = new JsonSerializerOptions
@@ -117,7 +135,16 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             var response = new ApiResponse
             {
                 Success = false,
-                Message = exception.Message
+                Message = exception.Message,
+                Errors = new[]
+                {
+                    new ValidationErrorDetail
+                    {
+                        Type = "AuthenticationError",
+                        Error = "Authentication failed",
+                        Detail = exception.Message
+                    }
+                }
             };
 
             var jsonOptions = new JsonSerializerOptions
@@ -136,7 +163,16 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             var response = new ApiResponse
             {
                 Success = false,
-                Message = exception.Message
+                Message = exception.Message,
+                Errors = new[]
+                {
+                    new ValidationErrorDetail
+                    {
+                        Type = "DomainError",
+                        Error = "Domain rule violation",
+                        Detail = exception.Message
+                    }
+                }
             };
 
             var jsonOptions = new JsonSerializerOptions
@@ -156,15 +192,17 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             {
                 new ValidationErrorDetail
                 {
+                    Type = "InternalError",
                     Error = exception.GetType().Name,
                     Detail = exception.Message
                 }
             };
-                        
+
             if (exception.InnerException != null)
             {
                 errors.Add(new ValidationErrorDetail
                 {
+                    Type = "InternalError",
                     Error = "InnerException",
                     Detail = exception.InnerException.Message
                 });
