@@ -41,12 +41,14 @@ public class SaleRepository : ISaleRepository
         int page = 1,
         int size = 10,
         string? order = null,
+        Dictionary<string, string>? filters = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Sales
             .Include(s => s.Items)
             .AsQueryable();
 
+        query = ApplyFilters(query, filters);
         query = ApplyOrdering(query, order);
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -75,6 +77,94 @@ public class SaleRepository : ISaleRepository
         _context.Sales.Remove(sale);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private static IQueryable<Sale> ApplyFilters(IQueryable<Sale> query, Dictionary<string, string>? filters)
+    {
+        if (filters == null || filters.Count == 0) return query;
+
+        foreach (var filter in filters)
+        {
+            var key = filter.Key.ToLowerInvariant();
+            var value = filter.Value;
+
+            if (key.StartsWith("_min"))
+            {
+                var field = key[4..];
+                query = field switch
+                {
+                    "saledate" when DateTime.TryParse(value, out var v) => query.Where(s => s.SaleDate >= v),
+                    "totalamount" when decimal.TryParse(value, out var v) => query.Where(s => s.TotalAmount >= v),
+                    "createdat" when DateTime.TryParse(value, out var v) => query.Where(s => s.CreatedAt >= v),
+                    _ => query
+                };
+                continue;
+            }
+            if (key.StartsWith("_max"))
+            {
+                var field = key[4..];
+                query = field switch
+                {
+                    "saledate" when DateTime.TryParse(value, out var v) => query.Where(s => s.SaleDate <= v),
+                    "totalamount" when decimal.TryParse(value, out var v) => query.Where(s => s.TotalAmount <= v),
+                    "createdat" when DateTime.TryParse(value, out var v) => query.Where(s => s.CreatedAt <= v),
+                    _ => query
+                };
+                continue;
+            }
+
+            query = key switch
+            {
+                "salenumber" => ApplySaleStringFilter(query, s => s.SaleNumber, value),
+                "customername" => ApplySaleStringFilter(query, s => s.CustomerName, value),
+                "branchname" => ApplySaleStringFilter(query, s => s.BranchName, value),
+                "customerid" when Guid.TryParse(value, out var v) => query.Where(s => s.CustomerId == v),
+                "branchid" when Guid.TryParse(value, out var v) => query.Where(s => s.BranchId == v),
+                "iscancelled" when bool.TryParse(value, out var v) => query.Where(s => s.IsCancelled == v),
+                _ => query
+            };
+        }
+
+        return query;
+    }
+
+    private static IQueryable<Sale> ApplySaleStringFilter(
+        IQueryable<Sale> query,
+        System.Linq.Expressions.Expression<Func<Sale, string>> selector,
+        string value)
+    {
+        var parameter = selector.Parameters[0];
+        var memberAccess = selector.Body;
+        var toLowerCall = System.Linq.Expressions.Expression.Call(memberAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes)!);
+
+        if (value.StartsWith("*") && value.EndsWith("*"))
+        {
+            var term = value.Trim('*').ToLower();
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+            var containsCall = System.Linq.Expressions.Expression.Call(toLowerCall, containsMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Sale, bool>>(containsCall, parameter);
+            return query.Where(lambda);
+        }
+        if (value.EndsWith("*"))
+        {
+            var term = value.TrimEnd('*').ToLower();
+            var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
+            var startsWithCall = System.Linq.Expressions.Expression.Call(toLowerCall, startsWithMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Sale, bool>>(startsWithCall, parameter);
+            return query.Where(lambda);
+        }
+        if (value.StartsWith("*"))
+        {
+            var term = value.TrimStart('*').ToLower();
+            var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
+            var endsWithCall = System.Linq.Expressions.Expression.Call(toLowerCall, endsWithMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Sale, bool>>(endsWithCall, parameter);
+            return query.Where(lambda);
+        }
+        // Exact match (case-insensitive)
+        var equalsCall = System.Linq.Expressions.Expression.Equal(toLowerCall, System.Linq.Expressions.Expression.Constant(value.ToLower()));
+        var exactLambda = System.Linq.Expressions.Expression.Lambda<Func<Sale, bool>>(equalsCall, parameter);
+        return query.Where(exactLambda);
     }
 
     private static IQueryable<Sale> ApplyOrdering(IQueryable<Sale> query, string? order)

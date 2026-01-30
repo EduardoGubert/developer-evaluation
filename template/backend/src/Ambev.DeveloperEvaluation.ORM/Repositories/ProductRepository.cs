@@ -41,10 +41,12 @@ public class ProductRepository : IProductRepository
         int page = 1,
         int size = 10,
         string? order = null,
+        Dictionary<string, string>? filters = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Products.AsQueryable();
 
+        query = ApplyFilters(query, filters);
         query = ApplyOrdering(query, order);
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -105,6 +107,93 @@ public class ProductRepository : IProductRepository
         _context.Products.Remove(product);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private static IQueryable<Product> ApplyFilters(IQueryable<Product> query, Dictionary<string, string>? filters)
+    {
+        if (filters == null || filters.Count == 0) return query;
+
+        foreach (var filter in filters)
+        {
+            var key = filter.Key.ToLowerInvariant();
+            var value = filter.Value;
+
+            if (key.StartsWith("_min"))
+            {
+                var field = key[4..]; // remove "_min"
+                query = field switch
+                {
+                    "price" when decimal.TryParse(value, out var v) => query.Where(p => p.Price >= v),
+                    "ratingrate" when decimal.TryParse(value, out var v) => query.Where(p => p.RatingRate >= v),
+                    "ratingcount" when int.TryParse(value, out var v) => query.Where(p => p.RatingCount >= v),
+                    _ => query
+                };
+                continue;
+            }
+
+            if (key.StartsWith("_max"))
+            {
+                var field = key[4..];
+                query = field switch
+                {
+                    "price" when decimal.TryParse(value, out var v) => query.Where(p => p.Price <= v),
+                    "ratingrate" when decimal.TryParse(value, out var v) => query.Where(p => p.RatingRate <= v),
+                    "ratingcount" when int.TryParse(value, out var v) => query.Where(p => p.RatingCount <= v),
+                    _ => query
+                };
+                continue;
+            }
+
+            query = key switch
+            {
+                "title" => ApplyStringFilter(query, p => p.Title, value),
+                "category" => ApplyStringFilter(query, p => p.Category, value),
+                "description" => ApplyStringFilter(query, p => p.Description, value),
+                "price" when decimal.TryParse(value, out var v) => query.Where(p => p.Price == v),
+                _ => query
+            };
+        }
+
+        return query;
+    }
+
+    private static IQueryable<Product> ApplyStringFilter(
+        IQueryable<Product> query,
+        System.Linq.Expressions.Expression<Func<Product, string>> selector,
+        string value)
+    {
+        var parameter = selector.Parameters[0];
+        var memberAccess = selector.Body;
+        var toLowerCall = System.Linq.Expressions.Expression.Call(memberAccess, typeof(string).GetMethod("ToLower", Type.EmptyTypes)!);
+
+        if (value.StartsWith("*") && value.EndsWith("*"))
+        {
+            var term = value.Trim('*').ToLower();
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+            var containsCall = System.Linq.Expressions.Expression.Call(toLowerCall, containsMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Product, bool>>(containsCall, parameter);
+            return query.Where(lambda);
+        }
+        if (value.EndsWith("*"))
+        {
+            var term = value.TrimEnd('*').ToLower();
+            var startsWithMethod = typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
+            var startsWithCall = System.Linq.Expressions.Expression.Call(toLowerCall, startsWithMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Product, bool>>(startsWithCall, parameter);
+            return query.Where(lambda);
+        }
+        if (value.StartsWith("*"))
+        {
+            var term = value.TrimStart('*').ToLower();
+            var endsWithMethod = typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
+            var endsWithCall = System.Linq.Expressions.Expression.Call(toLowerCall, endsWithMethod, System.Linq.Expressions.Expression.Constant(term));
+            var lambda = System.Linq.Expressions.Expression.Lambda<Func<Product, bool>>(endsWithCall, parameter);
+            return query.Where(lambda);
+        }
+        // Exact match (case-insensitive)
+        var equalsCall = System.Linq.Expressions.Expression.Equal(toLowerCall, System.Linq.Expressions.Expression.Constant(value.ToLower()));
+        var exactLambda = System.Linq.Expressions.Expression.Lambda<Func<Product, bool>>(equalsCall, parameter);
+        return query.Where(exactLambda);
     }
 
     private static IQueryable<Product> ApplyOrdering(IQueryable<Product> query, string? order)
