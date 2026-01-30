@@ -16,7 +16,7 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id)
             .HasColumnType("uuid")
-            .HasDefaultValueSql("gen_random_uuid()");
+            .ValueGeneratedNever();
 
         builder.Property(c => c.UserId)
             .IsRequired()
