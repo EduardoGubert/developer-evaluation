@@ -44,6 +44,10 @@ export class CartService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
+  deleteItemCart(id: string, productId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/products/${productId}`);
+  }
+
   checkout(cartId: string, request: CheckoutCartRequest): Observable<CheckoutCartResponse> {
     return this.http.post<ApiResponseWithData<CheckoutCartResponse>>(`${this.apiUrl}/${cartId}/checkout`, request).pipe(
       map(res => res.data)

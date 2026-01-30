@@ -154,6 +154,23 @@ export class ShoppingCartService {
         })
       );
     }
+    
+    if (currentCart.products.length > 1) {
+      return this.cartService.deleteItemCart(currentCart.id, productId).pipe(
+        tap(() => {
+          // Como a API retorna void, construímos o novo estado do carrinho localmente
+          const updatedCart = { ...currentCart, products: products };
+          this.cartSubject.next(updatedCart);
+          this.snackBar.open('Item removed', 'Close', { duration: 2000 });
+        }),
+        // Retornamos o objeto cart construído para manter o tipo de retorno consistente
+        map(() => ({ ...currentCart, products: products })),
+        catchError(err => {
+          this.snackBar.open('Failed to remove item', 'Close', { duration: 3000 });
+          return of(currentCart);
+        })
+      );
+    }
 
     return this.cartService.updateCart(currentCart.id, {
       userId,
