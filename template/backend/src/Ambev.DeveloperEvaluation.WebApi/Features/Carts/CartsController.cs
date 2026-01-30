@@ -12,6 +12,7 @@ using Ambev.DeveloperEvaluation.Application.Carts.GetCarts;
 using Ambev.DeveloperEvaluation.Application.Carts.UpdateCart;
 using Ambev.DeveloperEvaluation.Application.Carts.DeleteCart;
 using Ambev.DeveloperEvaluation.Application.Carts.CheckoutCart;
+using Ambev.DeveloperEvaluation.Application.Carts.RemoveCartItem;
 using Ambev.DeveloperEvaluation.WebApi.Features.Carts.CheckoutCart;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Carts;
@@ -200,6 +201,33 @@ public class CartsController : BaseController
         {
             Success = true,
             Message = "Cart deleted successfully"
+        });
+    }
+
+    /// <summary>
+    /// Removes a product from a cart.
+    /// </summary>
+    /// <param name="id">The cart ID.</param>
+    /// <param name="productId">The product ID to remove.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Success response if removed.</returns>
+    [HttpDelete("{id}/products/{productId}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<RemoveCartItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveCartItem(
+        [FromRoute] Guid id,
+        [FromRoute] Guid productId,
+        CancellationToken cancellationToken)
+    {
+        var command = new RemoveCartItemCommand(id, productId);
+        var response = await _mediator.Send(command, cancellationToken);
+
+        return Ok(new ApiResponseWithData<RemoveCartItemResponse>
+        {
+            Success = true,
+            Message = "Product removed from cart successfully",
+            Data = response
         });
     }
 

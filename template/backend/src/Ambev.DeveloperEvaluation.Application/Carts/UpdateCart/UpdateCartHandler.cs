@@ -34,13 +34,29 @@ public class UpdateCartHandler : IRequestHandler<UpdateCartCommand, UpdateCartRe
 
         existingCart.Update(command.UserId, command.Date);
 
-        // Clear existing products and add new ones
-        existingCart.Products.Clear();
+        var newItems = new List<CartItem>();
+
         foreach (var product in command.Products)
         {
-            existingCart.AddProduct(product.ProductId, product.Quantity);
+            var existingItem = existingCart.Products.FirstOrDefault(p => p.ProductId == product.ProductId);
+            if (existingItem != null)
+            {
+                existingItem.UpdateQuantity(product.Quantity);
+            }
+            else
+            {
+                var newItem = existingCart.AddProduct(product.ProductId, product.Quantity);
+                newItems.Add(newItem);
+            }
         }
 
+        // INSERT new CartItems first (before Update marks everything as Modified)
+        foreach (var newItem in newItems)
+        {
+            await _cartRepository.CreateItemAsync(newItem, cancellationToken);
+        }
+
+        // UPDATE cart and existing items (quantity changes)
         var updatedCart = await _cartRepository.UpdateAsync(existingCart, cancellationToken);
 
         return new UpdateCartResult

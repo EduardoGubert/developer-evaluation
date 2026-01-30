@@ -68,6 +68,7 @@ public class Cart : BaseEntity
         var item = new CartItem
         {
             CartId = Id,
+            Cart = this,
             ProductId = productId,
             Quantity = quantity
         };

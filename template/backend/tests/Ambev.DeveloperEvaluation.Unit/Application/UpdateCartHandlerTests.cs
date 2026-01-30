@@ -50,6 +50,8 @@ public class UpdateCartHandlerTests
 
         _cartRepository.GetByIdAsync(existingCart.Id, Arg.Any<CancellationToken>())
             .Returns(existingCart);
+        _cartRepository.CreateItemAsync(Arg.Any<CartItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<CartItem>());
         _cartRepository.UpdateAsync(Arg.Any<Cart>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Cart>());
 
@@ -60,7 +62,8 @@ public class UpdateCartHandlerTests
         result.Should().NotBeNull();
         result.Id.Should().Be(existingCart.Id);
         result.UserId.Should().Be(newUserId);
-        result.Products.Should().HaveCount(1);
+        result.Products.Should().HaveCount(3); // 2 original + 1 new (merge)
+        await _cartRepository.Received(1).CreateItemAsync(Arg.Any<CartItem>(), Arg.Any<CancellationToken>());
         await _cartRepository.Received(1).UpdateAsync(Arg.Any<Cart>(), Arg.Any<CancellationToken>());
     }
 
@@ -120,14 +123,14 @@ public class UpdateCartHandlerTests
     }
 
     /// <summary>
-    /// Tests that cart products are replaced on update.
+    /// Tests that new products are merged into existing cart (not replaced).
     /// </summary>
-    [Fact(DisplayName = "Given new products When updating cart Then replaces existing products")]
-    public async Task Handle_NewProducts_ReplacesExistingProducts()
+    [Fact(DisplayName = "Given new products When updating cart Then merges with existing products")]
+    public async Task Handle_NewProducts_MergesWithExistingProducts()
     {
         // Given
         var existingCart = CartTestData.GenerateValidCart();
-        var originalProductCount = existingCart.Products.Count;
+        var originalProductCount = existingCart.Products.Count; // 2
         var newProducts = new List<UpdateCartProductCommand>
         {
             new UpdateCartProductCommand { ProductId = Guid.NewGuid(), Quantity = 3 },
@@ -145,6 +148,8 @@ public class UpdateCartHandlerTests
 
         _cartRepository.GetByIdAsync(existingCart.Id, Arg.Any<CancellationToken>())
             .Returns(existingCart);
+        _cartRepository.CreateItemAsync(Arg.Any<CartItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<CartItem>());
         _cartRepository.UpdateAsync(Arg.Any<Cart>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Cart>());
 
@@ -153,7 +158,45 @@ public class UpdateCartHandlerTests
 
         // Then
         result.Should().NotBeNull();
-        result.Products.Should().HaveCount(3);
-        result.Products.Should().NotHaveCount(originalProductCount);
+        result.Products.Should().HaveCount(originalProductCount + 3); // merged
+        await _cartRepository.Received(3).CreateItemAsync(Arg.Any<CartItem>(), Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Tests that updating an existing product updates its quantity instead of adding a duplicate.
+    /// </summary>
+    [Fact(DisplayName = "Given existing product When updating cart Then updates quantity")]
+    public async Task Handle_ExistingProduct_UpdatesQuantity()
+    {
+        // Given
+        var existingCart = CartTestData.GenerateValidCart();
+        var existingProduct = existingCart.Products.First();
+        var newQuantity = 15;
+
+        var command = new UpdateCartCommand
+        {
+            Id = existingCart.Id,
+            UserId = existingCart.UserId,
+            Date = existingCart.Date,
+            Products = new List<UpdateCartProductCommand>
+            {
+                new UpdateCartProductCommand { ProductId = existingProduct.ProductId, Quantity = newQuantity }
+            }
+        };
+
+        _cartRepository.GetByIdAsync(existingCart.Id, Arg.Any<CancellationToken>())
+            .Returns(existingCart);
+        _cartRepository.UpdateAsync(Arg.Any<Cart>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<Cart>());
+
+        // When
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Then
+        result.Should().NotBeNull();
+        result.Products.Should().HaveCount(existingCart.Products.Count); // same count
+        result.Products.First(p => p.ProductId == existingProduct.ProductId)
+            .Quantity.Should().Be(newQuantity);
+        await _cartRepository.DidNotReceive().CreateItemAsync(Arg.Any<CartItem>(), Arg.Any<CancellationToken>());
     }
 }

@@ -54,6 +54,22 @@ public interface ICartRepository
     Task<Cart> UpdateAsync(Cart cart, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Creates a new cartItem in the repository.
+    /// </summary>
+    /// <param name="cartItem">The cartItem to create.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The created cartItem.</returns>
+    Task<CartItem> CreateItemAsync(CartItem cartItem, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a cart item by its unique identifier.
+    /// </summary>
+    /// <param name="cartItemId">The cart item ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if deleted, false otherwise.</returns>
+    Task<bool> DeleteItemAsync(Guid cartItemId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Deletes a cart by its unique identifier.
     /// </summary>
     /// <param name="id">The cart ID.</param>

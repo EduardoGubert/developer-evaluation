@@ -1,6 +1,7 @@
-﻿using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Middleware
@@ -8,10 +9,12 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
     public class ValidationExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ValidationExceptionMiddleware> _logger;
 
-        public ValidationExceptionMiddleware(RequestDelegate next)
+        public ValidationExceptionMiddleware(RequestDelegate next, ILogger<ValidationExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -23,6 +26,27 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             catch (ValidationException ex)
             {
                 await HandleValidationExceptionAsync(context, ex);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                await HandleNotFoundExceptionAsync(context, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await HandleUnauthorizedExceptionAsync(context, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                await HandleBadRequestExceptionAsync(context, ex);
+            }
+            catch (DomainException ex)
+            {
+                await HandleDomainExceptionAsync(context, ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception occurred");
+                await HandleUnexpectedExceptionAsync(context, ex);
             }
         }
 
@@ -37,6 +61,121 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
                 Message = "Validation Failed",
                 Errors = exception.Errors
                     .Select(error => (ValidationErrorDetail)error)
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
+        }
+
+        private static Task HandleNotFoundExceptionAsync(HttpContext context, KeyNotFoundException exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = exception.Message
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
+        }
+
+        private static Task HandleBadRequestExceptionAsync(HttpContext context, InvalidOperationException exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = exception.Message
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
+        }
+
+        private static Task HandleUnauthorizedExceptionAsync(HttpContext context, UnauthorizedAccessException exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = exception.Message
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
+        }
+
+        private static Task HandleDomainExceptionAsync(HttpContext context, DomainException exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = exception.Message
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, jsonOptions));
+        }
+
+        private static Task HandleUnexpectedExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            var errors = new List<ValidationErrorDetail>
+            {
+                new ValidationErrorDetail
+                {
+                    Error = exception.GetType().Name,
+                    Detail = exception.Message
+                }
+            };
+
+            // Include inner exception if present
+            if (exception.InnerException != null)
+            {
+                errors.Add(new ValidationErrorDetail
+                {
+                    Error = "InnerException",
+                    Detail = exception.InnerException.Message
+                });
+            }
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = "An unexpected error occurred. Please try again later.",
+                Errors = errors
             };
 
             var jsonOptions = new JsonSerializerOptions

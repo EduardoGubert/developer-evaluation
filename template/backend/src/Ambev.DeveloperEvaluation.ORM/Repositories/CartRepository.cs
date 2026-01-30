@@ -66,6 +66,24 @@ public class CartRepository : ICartRepository
         return cart;
     }
 
+    public async Task<CartItem> CreateItemAsync(CartItem cartItem, CancellationToken cancellationToken = default)
+    {
+        await _context.CartItems.AddAsync(cartItem, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        return cartItem;
+    }
+
+    public async Task<bool> DeleteItemAsync(Guid cartItemId, CancellationToken cancellationToken = default)
+    {
+        var cartItem = await _context.CartItems.FindAsync(new object[] { cartItemId }, cancellationToken);
+        if (cartItem == null)
+            return false;
+
+        _context.CartItems.Remove(cartItem);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var cart = await GetByIdAsync(id, cancellationToken);

@@ -29,6 +29,14 @@ public class ProductRepository : IProductRepository
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
+    public async Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        return await _context.Products
+            .Where(p => idList.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<(IEnumerable<Product> Products, int TotalCount)> GetAllAsync(
         int page = 1,
         int size = 10,

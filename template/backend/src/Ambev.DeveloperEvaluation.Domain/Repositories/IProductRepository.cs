@@ -75,4 +75,12 @@ public interface IProductRepository
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>True if deleted, false otherwise.</returns>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves multiple products by their unique identifiers.
+    /// </summary>
+    /// <param name="ids">The product IDs.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The products found.</returns>
+    Task<IEnumerable<Product>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default);
 }
