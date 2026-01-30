@@ -47,7 +47,7 @@ public class GetProductsHandlerTests
         };
         var command = new GetProductsCommand { Page = 1, Size = 10 };
 
-        _productRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _productRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((products.AsEnumerable(), 3));
 
         // When
@@ -70,7 +70,7 @@ public class GetProductsHandlerTests
         // Given
         var command = new GetProductsCommand { Page = 1, Size = 10 };
 
-        _productRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _productRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((Enumerable.Empty<Product>(), 0));
 
         // When
@@ -93,7 +93,7 @@ public class GetProductsHandlerTests
         var products = new List<Product> { ProductTestData.GenerateValidProduct() };
         var command = new GetProductsCommand { Page = 2, Size = 5 };
 
-        _productRepository.GetAllAsync(2, 5, null, Arg.Any<CancellationToken>())
+        _productRepository.GetAllAsync(2, 5, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((products.AsEnumerable(), 12)); // 12 total items, 5 per page = 3 pages
 
         // When
@@ -116,13 +116,13 @@ public class GetProductsHandlerTests
         var products = new List<Product> { ProductTestData.GenerateValidProduct() };
         var command = new GetProductsCommand { Page = 1, Size = 10, Order = "price desc" };
 
-        _productRepository.GetAllAsync(1, 10, "price desc", Arg.Any<CancellationToken>())
+        _productRepository.GetAllAsync(1, 10, "price desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((products.AsEnumerable(), 1));
 
         // When
         await _handler.Handle(command, CancellationToken.None);
 
         // Then
-        await _productRepository.Received(1).GetAllAsync(1, 10, "price desc", Arg.Any<CancellationToken>());
+        await _productRepository.Received(1).GetAllAsync(1, 10, "price desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>());
     }
 }

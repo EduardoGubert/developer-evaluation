@@ -46,7 +46,7 @@ public class GetSalesHandlerTests
             TotalAmount = s.TotalAmount
         }).ToList();
 
-        _saleRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _saleRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((sales.AsEnumerable(), 3));
         _mapper.Map<List<GetSalesItemResult>>(Arg.Any<List<Sale>>())
             .Returns(mappedItems);
@@ -71,7 +71,7 @@ public class GetSalesHandlerTests
         // Given
         var command = new GetSalesCommand { Page = 1, Size = 10 };
 
-        _saleRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _saleRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((Enumerable.Empty<Sale>(), 0));
         _mapper.Map<List<GetSalesItemResult>>(Arg.Any<List<Sale>>())
             .Returns(new List<GetSalesItemResult>());
@@ -100,7 +100,7 @@ public class GetSalesHandlerTests
             new GetSalesItemResult { Id = sales[0].Id }
         };
 
-        _saleRepository.GetAllAsync(2, 5, null, Arg.Any<CancellationToken>())
+        _saleRepository.GetAllAsync(2, 5, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((sales.AsEnumerable(), 12)); // 12 total items, 5 per page = 3 pages
         _mapper.Map<List<GetSalesItemResult>>(Arg.Any<List<Sale>>())
             .Returns(mappedItems);
@@ -125,7 +125,7 @@ public class GetSalesHandlerTests
         var sales = new List<Sale> { SaleTestData.GenerateValidSale() };
         var command = new GetSalesCommand { Page = 1, Size = 10, Order = "saleDate desc" };
 
-        _saleRepository.GetAllAsync(1, 10, "saleDate desc", Arg.Any<CancellationToken>())
+        _saleRepository.GetAllAsync(1, 10, "saleDate desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((sales.AsEnumerable(), 1));
         _mapper.Map<List<GetSalesItemResult>>(Arg.Any<List<Sale>>())
             .Returns(new List<GetSalesItemResult>());
@@ -134,6 +134,6 @@ public class GetSalesHandlerTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Then
-        await _saleRepository.Received(1).GetAllAsync(1, 10, "saleDate desc", Arg.Any<CancellationToken>());
+        await _saleRepository.Received(1).GetAllAsync(1, 10, "saleDate desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>());
     }
 }

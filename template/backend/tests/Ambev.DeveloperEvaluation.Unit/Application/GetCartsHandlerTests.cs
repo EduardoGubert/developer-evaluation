@@ -39,7 +39,7 @@ public class GetCartsHandlerTests
         };
         var command = new GetCartsCommand { Page = 1, Size = 10 };
 
-        _cartRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _cartRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((carts, 2));
 
         // When
@@ -62,7 +62,7 @@ public class GetCartsHandlerTests
         // Given
         var command = new GetCartsCommand { Page = 1, Size = 10 };
 
-        _cartRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _cartRepository.GetAllAsync(1, 10, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((new List<Cart>(), 0));
 
         // When
@@ -85,7 +85,7 @@ public class GetCartsHandlerTests
         var carts = new List<Cart> { CartTestData.GenerateValidCart() };
         var command = new GetCartsCommand { Page = 2, Size = 5 };
 
-        _cartRepository.GetAllAsync(2, 5, null, Arg.Any<CancellationToken>())
+        _cartRepository.GetAllAsync(2, 5, null, Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((carts, 12));
 
         // When
@@ -112,13 +112,13 @@ public class GetCartsHandlerTests
             Order = "date desc"
         };
 
-        _cartRepository.GetAllAsync(1, 10, "date desc", Arg.Any<CancellationToken>())
+        _cartRepository.GetAllAsync(1, 10, "date desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>())
             .Returns((new List<Cart>(), 0));
 
         // When
         await _handler.Handle(command, CancellationToken.None);
 
         // Then
-        await _cartRepository.Received(1).GetAllAsync(1, 10, "date desc", Arg.Any<CancellationToken>());
+        await _cartRepository.Received(1).GetAllAsync(1, 10, "date desc", Arg.Any<Dictionary<string, string>?>(), Arg.Any<CancellationToken>());
     }
 }

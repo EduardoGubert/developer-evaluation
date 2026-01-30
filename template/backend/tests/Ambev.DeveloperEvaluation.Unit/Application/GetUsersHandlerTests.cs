@@ -46,7 +46,7 @@ public class GetUsersHandlerTests
             Username = u.Username
         }).ToList();
 
-        _userRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _userRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>(), Arg.Any<Dictionary<string, string>?>())
             .Returns((users.AsEnumerable(), 3));
         _mapper.Map<List<GetUsersItemResult>>(Arg.Any<List<User>>())
             .Returns(mappedItems);
@@ -71,7 +71,7 @@ public class GetUsersHandlerTests
         // Given
         var command = new GetUsersCommand { Page = 1, Size = 10 };
 
-        _userRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>())
+        _userRepository.GetAllAsync(1, 10, null, Arg.Any<CancellationToken>(), Arg.Any<Dictionary<string, string>?>())
             .Returns((Enumerable.Empty<User>(), 0));
         _mapper.Map<List<GetUsersItemResult>>(Arg.Any<List<User>>())
             .Returns(new List<GetUsersItemResult>());
@@ -100,7 +100,7 @@ public class GetUsersHandlerTests
             new GetUsersItemResult { Id = users[0].Id }
         };
 
-        _userRepository.GetAllAsync(2, 5, null, Arg.Any<CancellationToken>())
+        _userRepository.GetAllAsync(2, 5, null, Arg.Any<CancellationToken>(), Arg.Any<Dictionary<string, string>?>())
             .Returns((users.AsEnumerable(), 12)); // 12 total items, 5 per page = 3 pages
         _mapper.Map<List<GetUsersItemResult>>(Arg.Any<List<User>>())
             .Returns(mappedItems);
@@ -125,7 +125,7 @@ public class GetUsersHandlerTests
         var users = new List<User> { UserTestData.GenerateValidUser() };
         var command = new GetUsersCommand { Page = 1, Size = 10, Order = "username desc" };
 
-        _userRepository.GetAllAsync(1, 10, "username desc", Arg.Any<CancellationToken>())
+        _userRepository.GetAllAsync(1, 10, "username desc", Arg.Any<CancellationToken>(), Arg.Any<Dictionary<string, string>?>())
             .Returns((users.AsEnumerable(), 1));
         _mapper.Map<List<GetUsersItemResult>>(Arg.Any<List<User>>())
             .Returns(new List<GetUsersItemResult>());
@@ -134,6 +134,6 @@ public class GetUsersHandlerTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Then
-        await _userRepository.Received(1).GetAllAsync(1, 10, "username desc", Arg.Any<CancellationToken>());
+        await _userRepository.Received(1).GetAllAsync(1, 10, "username desc", Arg.Any<CancellationToken>(), Arg.Any<Dictionary<string, string>?>());
     }
 }
